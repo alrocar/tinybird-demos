@@ -8,7 +8,8 @@ var width = window.innerWidth,
     height = window.innerHeight,
     padding = 3.5, // separation between same-color nodes
     clusterPadding = 18, // separation between different-color nodes
-    maxRadius = 300;
+    maxRadius = 300,
+    minRadius = 14;
 
 var n = 50, // total number of nodes
     m = 2; // number of distinct clusters
@@ -26,7 +27,7 @@ fetch(url).then(response => response.json())
 
     var nodes = json['data'].map((elem) => {
         var i = terms.indexOf(elem['search_term'])
-            r = Math.min(elem['size'], maxRadius), 
+            r = Math.max(Math.min(elem['size'], maxRadius), minRadius), 
             d = {cluster: i, radius: r, ...elem};
         if (!clusters[i] || (r > clusters[i].radius)) clusters[i] = d;
         return d;
