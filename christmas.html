@@ -33,6 +33,8 @@ fetch(url).then(response => response.json())
         return d;
     });
 
+    var elems = nodes;
+
     // Use the pack layout to initialize node positions.
     d3.layout.pack()
         .sort(null)
@@ -130,9 +132,26 @@ fetch(url).then(response => response.json())
 
     c = 0;
     setInterval(function () {
+        pos = Math.floor(Math.random() * 100)
+
+        fetch(url).then(response => response.json())
+                  .then(json => {
+                        terms = ['Merry Christmas', 'covid']
+
+                        var nodes = json['data'].map((e) => {
+                            var node = svg.select('#_' + e['id'])
+                                          .style("font-size", function(d) { 
+                                              d.radius = Math.max(Math.min(e['size'], maxRadius), minRadius);
+                                              return d.radius; 
+                                          });
+                        });
+                    });
+    }, 10000);
+
+    setInterval(function () {
         console.log('force drag')
         force.resume()
-    }, 3000);
+    }, 2000);
 });
 
 </script>
