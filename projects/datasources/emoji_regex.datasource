@@ -1,0 +1,8 @@
+
+SCHEMA >
+    `regex` String
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "substring(regex, 1, 1)"
+ENGINE_SORTING_KEY "regex, cityHash64(regex)"
+ENGINE_SAMPLING_KEY "cityHash64(regex)"

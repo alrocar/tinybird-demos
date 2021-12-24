@@ -1,0 +1,7 @@
+
+SCHEMA >
+    `date` DateTime `json:$.date`,
+    `search_term` LowCardinality(String) `json:$.search_term`,
+    `tweet` String `json:$.tweet`
+
+ENGINE "Null"

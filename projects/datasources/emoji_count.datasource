@@ -1,0 +1,11 @@
+
+SCHEMA >
+    `date` DateTime,
+    `search_term` LowCardinality(String),
+    `emoji` String,
+    `count` SimpleAggregateFunction(sum, UInt64)
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(date)"
+ENGINE_PRIMARY_KEY "date, search_term"
+ENGINE_SORTING_KEY "date, search_term, emoji"

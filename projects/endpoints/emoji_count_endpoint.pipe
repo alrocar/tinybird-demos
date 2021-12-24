@@ -1,0 +1,52 @@
+NODE emoji_count_pipe_6543_0
+SQL >
+
+    %
+    SELECT
+      sum(count) count,
+      emoji,
+      cityHash64(emoji, search_term) as id,
+      search_term
+    FROM emoji_count
+      {% if defined(search_term) %}
+    where
+    {{sql_and(
+                search_term__in=Array(search_term, defined=False)
+                )}}
+    {% end %}
+    GROUP by emoji, search_term
+    ORDER BY count desc
+    LIMIT {{UInt8(limit, 20)}} BY search_term
+
+
+
+NODE emoji_count_endpoint_1
+SQL >
+
+    %
+    SELECT 
+    sum(count) count,
+    search_term
+    FROM emoji_count
+      {% if defined(search_term) %}
+    where
+    {{sql_and(
+                search_term__in=Array(search_term, defined=False)
+                )}}
+    {% end %}
+    GROUP by search_term
+    ORDER BY count desc
+    LIMIT 1 by search_term
+
+
+
+NODE emoji_count_endpoint_2
+SQL >
+
+    WITH (SELECT (groupArray(count), groupArray(cityHash64(search_term))) FROM emoji_count_endpoint_1) as max_count
+    select
+    *,
+    count/transform(cityHash64(search_term), max_count.2, max_count.1) * 1000 as size
+    from emoji_count_pipe_6543_0
+
+
