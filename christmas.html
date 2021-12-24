@@ -8,10 +8,16 @@ var width = window.innerWidth,
     height = window.innerHeight,
     padding = 3.5, // separation between same-color nodes
     clusterPadding = 18, // separation between different-color nodes
-    maxRadius = 300,
+    maxRadius = 500,
     minRadius = 14;
 
-var n = 50, // total number of nodes
+function get(name){
+   if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search))
+      return decodeURIComponent(name[1]);
+    return 50;
+}
+
+var n = get('limit'), // total number of nodes
     m = 2; // number of distinct clusters
 
 var color = d3.scale.category10()
@@ -19,6 +25,8 @@ var color = d3.scale.category10()
 
 // The largest node for each cluster.
 var clusters = new Array(m);
+
+
 
 url = 'https://api.wadus.tinybird.co/v0/pipes/emoji_count_endpoint.json?token=p.eyJ1IjogImMzNzE2ZTEwLTRjODktNGU4Yi1hMDYzLWUyYTJmNTNlZWQzZCIsICJpZCI6ICJjMmFiMTJkOC1mN2IzLTQ2YjEtYTBkMC1iYjA3OWRjMmNjM2YifQ.nutgsp5IGvLCjV38WW0O7MCgfH3X_hZeXTuszGnmG_o&limit=' + n
 fetch(url).then(response => response.json())
