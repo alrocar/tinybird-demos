@@ -1,6 +1,7 @@
 <html>
 <meta charset="utf-8">
 <body>
+    <pre><h1>Christmas emojis vs COVID emojis in Twitter. <pre id="tt">Total emojis processed: </pre></h1></pre>
 <script src="https://d3js.org/d3.v3.min.js"></script>
 <script>
 
@@ -25,7 +26,7 @@ var color = d3.scale.category10()
 
 // The largest node for each cluster.
 var clusters = new Array(m);
-
+var totalCount = 0
 
 
 url = 'https://api.wadus.tinybird.co/v0/pipes/emoji_count_endpoint.json?token=p.eyJ1IjogImMzNzE2ZTEwLTRjODktNGU4Yi1hMDYzLWUyYTJmNTNlZWQzZCIsICJpZCI6ICJjMmFiMTJkOC1mN2IzLTQ2YjEtYTBkMC1iYjA3OWRjMmNjM2YifQ.nutgsp5IGvLCjV38WW0O7MCgfH3X_hZeXTuszGnmG_o&limit=' + n
@@ -37,9 +38,12 @@ fetch(url).then(response => response.json())
         var i = terms.indexOf(elem['search_term'])
             r = Math.max(Math.min(elem['size'], maxRadius), minRadius), 
             d = {cluster: i, radius: r, ...elem};
+        totalCount += elem['count'];
         if (!clusters[i] || (r > clusters[i].radius)) clusters[i] = d;
         return d;
     });
+
+    document.getElementById("tt").innerHTML = "Total emojis processed: " + totalCount;
 
     var elems = nodes;
 
@@ -142,17 +146,20 @@ fetch(url).then(response => response.json())
     setInterval(function () {
         pos = Math.floor(Math.random() * 100)
 
+        totalCount = 0
         fetch(url).then(response => response.json())
                   .then(json => {
                         terms = ['Merry Christmas', 'covid']
 
                         var nodes = json['data'].map((e) => {
+                            totalCount += e['count'];
                             var node = svg.select('#_' + e['id'])
                                           .style("font-size", function(d) { 
                                               d.radius = Math.max(Math.min(e['size'], maxRadius), minRadius);
                                               return d.radius; 
                                           });
                         });
+                        document.getElementById("tt").innerHTML = "Total emojis processed: " + totalCount;
                     });
     }, 10000);
 
