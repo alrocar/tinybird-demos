@@ -26,7 +26,7 @@ var clusters = new Array(m);
 var totalCount = 0
 
 
-url = 'https://api.wadus.tinybird.co/v0/pipes/emoji_count_endpoint.json?token=p.eyJ1IjogImMzNzE2ZTEwLTRjODktNGU4Yi1hMDYzLWUyYTJmNTNlZWQzZCIsICJpZCI6ICJjMmFiMTJkOC1mN2IzLTQ2YjEtYTBkMC1iYjA3OWRjMmNjM2YifQ.nutgsp5IGvLCjV38WW0O7MCgfH3X_hZeXTuszGnmG_o&limit=' + n
+url = 'https://api.wadus.tinybird.co/v0/pipes/emoji_count_endpoint.json?token=p.eyJ1IjogImMzNzE2ZTEwLTRjODktNGU4Yi1hMDYzLWUyYTJmNTNlZWQzZCIsICJpZCI6ICJjMmFiMTJkOC1mN2IzLTQ2YjEtYTBkMC1iYjA3OWRjMmNjM2YifQ.nutgsp5IGvLCjV38WW0O7MCgfH3X_hZeXTuszGnmG_o&search_term=covid,Merry%20Christmas&limit=' + n
 fetch(url).then(response => response.json())
           .then(json => {
     terms = ['Merry Christmas', 'covid']
