@@ -21,9 +21,6 @@ function get(name){
 var n = get('limit'), // total number of nodes
     m = 2; // number of distinct clusters
 
-var color = d3.scale.category10()
-    .domain(d3.range(m));
-
 // The largest node for each cluster.
 var clusters = new Array(m);
 var totalCount = 0
@@ -76,12 +73,11 @@ fetch(url).then(response => response.json())
         .attr('text-anchor', 'middle')
         .style("font-size", function(d) { return d.radius; })
         .text(function(d) { return d.emoji; })
-        .style("fill", function(d) { return color(d.cluster); })
         .call(force.drag);
 
     node.transition()
-        .duration(150)
-        .delay(function(d, i) { return i * 5; })
+        .duration(1750)
+        .delay(function(d, i) { return i; })
         .attrTween("r", function(d) {
         var i = d3.interpolate(0, d.radius);
         return function(t) { return d.radius = i(t); };
@@ -89,8 +85,8 @@ fetch(url).then(response => response.json())
 
     function tick(e) {
     node
-        .each(cluster(10 * e.alpha * e.alpha))
-        .each(collide(.5))
+        .each(cluster(15 * e.alpha * e.alpha))
+        .each(collide(0.3))
         .attr("x", function(d) { return d.x; })
         .attr("y", function(d) { return d.y; });
     }
