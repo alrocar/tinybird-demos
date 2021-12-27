@@ -1,23 +1,36 @@
+from flask import Flask, redirect, request
+import tweepy
+import os
 
-# Importing flask module in the project is mandatory
-# An object of Flask class is our WSGI application.
-from flask import Flask
  
-# Flask constructor takes the name of
-# current module (__name__) as argument.
 app = Flask(__name__)
  
-# The route() function of the Flask class is a decorator,
-# which tells the application which URL should call
-# the associated function.
 @app.route('/')
-# ‘/’ URL is bound with hello_world() function.
-def hello_world():
-    return 'Hello World'
+def login():
+    key = os.getenv('CONSUMER_KEY')
+    secret = os.getenv('CONSUMER_SECRET')
+    auth = tweepy.OAuthHandler(key, secret, 'https://emojis-wrapped.herokuapp.com/auth')
+    redirect_url = auth.get_authorization_url()
+    return redirect(redirect_url, code=302)
+    
+
+@app.route('/auth')
+def auth():
+    key = os.getenv('CONSUMER_KEY')
+    secret = os.getenv('CONSUMER_SECRET')
+    auth = tweepy.OAuthHandler(key, secret, 'https://emojis-wrapped.herokuapp.com/auth')
+    oauth_token = request.args.get('oauth_token', type=str)
+    oauth_verifier = request.args.get('oauth_verifier', type=str)
+    auth.request_token = {
+        'oauth_token' : oauth_token,
+        'oauth_token_secret' : oauth_verifier
+    }
+    result = auth.get_access_token(oauth_verifier)
+    auth.set_access_token(result[0], result[1])
+    api = tweepy.API(auth)
+    user = api.verify_credentials()
+    return repr(user)
  
-# main driver function
+
 if __name__ == '__main__':
- 
-    # run() method of Flask class runs the application
-    # on the local development server.
     app.run()
