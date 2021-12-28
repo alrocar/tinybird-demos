@@ -29,7 +29,7 @@ def auth():
     auth.set_access_token(result[0], result[1])
     api = tweepy.API(auth)
     user = api.verify_credentials()
-    return repr(user)
+    return repr(result) + repr(user)
  
 
 if __name__ == '__main__':
