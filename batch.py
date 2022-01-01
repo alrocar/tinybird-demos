@@ -181,7 +181,7 @@ def to_tinybird(user_name, tweets):
 
 
 def update_status(user, status):
-    url = f'{TB_API_URL}/datasources?mode=append&name=users&format=ndjson'
+    url = f'{TB_API_URL}/datasources?mode=append&name=user&format=ndjson'
 
     chunk = StringIO()
     user = {

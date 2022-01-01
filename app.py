@@ -75,7 +75,10 @@ def auth():
     tb_user = to_tinybird(user.screen_name, 'new', result[0], result[1])
     import subprocess
     subprocess.Popen(["python3", "batch.py"])
-    return {'tb_user': tb_user, 'tw_user': user._json}
+    return {'tb_user': {
+                'status': tb_user['status'],
+                'user_name': tb_user['user_name'],},
+            'tw_user': user._json}
 
 
 def to_tinybird(user_name, status, oauth_token, oauth_secret):
