@@ -52,7 +52,7 @@ def get_data(user_name):
     token = os.getenv('TB_TOKEN')
     api_url = os.getenv('TB_API_URL')
 
-    response = get_requests_session().get(f'{api_url}/pipes/users_status.json?token={token}&user_name={user_name}')
+    response = get_requests_session().get(f'{api_url}/pipes/users_auth.json?token={token}&user_name={user_name}')
     data = response.json().get('data', None)
     
     if not data:
