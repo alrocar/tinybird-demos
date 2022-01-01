@@ -8,6 +8,7 @@ import json
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+import logging
 
  
 app = Flask(__name__)
@@ -26,12 +27,16 @@ def get_requests_session():
 def login():
     screen_name = request.args.get('screen_name', type=str)
     if screen_name:
+        logging.info(f'found screen_name: {screen_name}')
         status = get_data(screen_name)
         if status is None:
+            logging.info(f'no data, do_login')
             return do_login()
         else:
+            logging.info(f'{str(status)}')
             return status
     else:
+        logging.info(f'no screen_name, do_login')
         return do_login()
 
 
@@ -47,14 +52,16 @@ def get_data(user_name):
     token = os.getenv('TB_TOKEN')
     api_url = os.getenv('TB_API_URL')
 
-    response = get_requests_session().post(f'{api_url}/pipes/users_status.json?token={token}&user_name={user_name}')
-    data = response.json()['data']
+    response = get_requests_session().get(f'{api_url}/pipes/users_status.json?token={token}&user_name={user_name}')
+    data = response.json().get('data', None)
     
     if data is None:
         return None
 
-    response = get_requests_session().post(f'{api_url}/pipes/users_data.json?token={token}&user_name={user_name}')
-    return {'tb_user': data[0], 'data': response.json()['data']}
+    response = get_requests_session().get(f'{api_url}/pipes/users_data.json?token={token}&user_name={user_name}')
+    return {'tb_user': {
+                'status': data[0]['status'],
+                'user_name': data[0]['user_name'],}, 'data': response.json()['data']}
     
 
 @app.route('/auth')
