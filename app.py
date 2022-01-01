@@ -4,7 +4,6 @@ import os
 from io import StringIO
 import datetime
 import time
-from time import strftime
 import json
 import requests
 from requests.adapters import HTTPAdapter
@@ -87,7 +86,7 @@ def to_tinybird(user_name, status, oauth_token, oauth_secret):
 
     chunk = StringIO()
     user = {
-        'date': strftime("%Y-%m-%d %H:%M:%S", datetime.datetime.now()),
+        'date': str(datetime.datetime.now()),
         'user_name': user_name,
         'status': status,
         'oauth_token': oauth_token,

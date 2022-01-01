@@ -9,7 +9,6 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from io import StringIO
-from time import strftime
 import datetime
 import os
 
@@ -133,7 +132,7 @@ def to_tinybird(user_name, tweets):
     chunk = StringIO()
     for tweet in tweets:
         chunk.write(json.dumps({
-            'date': strftime("%Y-%m-%d %H:%M:%S", datetime.datetime.now()),
+            'date': str(datetime.datetime.now()),
             'search_term': user_name,
             'tweet': tweet
         }))
