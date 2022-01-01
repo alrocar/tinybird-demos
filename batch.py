@@ -133,11 +133,7 @@ def to_tinybird(user_name, tweets):
 
     chunk = StringIO()
     for tweet in tweets:
-        chunk.write(json.dumps({
-            'date': str(datetime.datetime.now()),
-            'search_term': user_name,
-            'tweet': tweet
-        }))
+        chunk.write(tweet)
 
         if chunk.tell() > 7 * (1024 ** 2):
             data = chunk.getvalue()
