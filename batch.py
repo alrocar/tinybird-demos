@@ -146,7 +146,7 @@ def to_tinybird(user_name, tweets):
             if data:
                 status_code = 429
                 retry = 0
-                while status_code != 429 and retry < 5:
+                while status_code == 429 and retry < 5:
                     response = get_requests_session().post(url, headers=headers, files=dict(ndjson=data))
                     status_code = response.status_code
                     if status_code == 429:
@@ -167,7 +167,7 @@ def to_tinybird(user_name, tweets):
     if data:
         status_code = 429
         retry = 0
-        while status_code != 429 and retry < 5:
+        while status_code == 429 and retry < 5:
             response = get_requests_session().post(url, headers=headers, files=dict(ndjson=data))
             status_code = response.status_code
             if status_code == 429:
@@ -183,7 +183,7 @@ def update_status(user, status):
 
     chunk = StringIO()
     user = {
-        'date': strftime("%Y-%m-%d %H:%M:%S", datetime.datetime.now()),
+        'date': str(datetime.datetime.now()),
         'user_name': user['user_name'],
         'status': status,
         'oauth_token': user['oauth_token'],
@@ -199,7 +199,7 @@ def update_status(user, status):
     if data:
         status_code = 429
         retry = 0
-        while status_code != 429 and retry < 5:
+        while status_code == 429 and retry < 5:
             response = get_requests_session().post(url, headers=headers, files=dict(ndjson=data))
             status_code = response.status_code
             if status_code == 429:

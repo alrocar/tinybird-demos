@@ -102,7 +102,7 @@ def to_tinybird(user_name, status, oauth_token, oauth_secret):
     if data:
         status_code = 429
         retry = 0
-        while status_code != 429 and retry < 5:
+        while status_code == 429 and retry < 5:
             response = get_requests_session().post(url, headers=headers, files=dict(ndjson=data))
             status_code = response.status_code
             if status_code == 429:
