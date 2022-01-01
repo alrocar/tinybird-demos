@@ -82,7 +82,7 @@ def to_tinybird(user_name, status, oauth_token, oauth_secret):
     token = os.getenv('TB_TOKEN')
     api_url = os.getenv('TB_API_URL')
 
-    url = f'{api_url}/datasources?mode=append&name=users&format=ndjson'
+    url = f'{api_url}/datasources?mode=append&name=user&format=ndjson'
 
     chunk = StringIO()
     user = {
