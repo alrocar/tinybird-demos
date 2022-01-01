@@ -29,7 +29,9 @@ def get_requests_session():
 
 
 def get_users():
-    response = get_requests_session().get(f'{TB_API_URL}/pipes/users_status.json?token={TB_TOKEN}&status=new')
+    url = f'{TB_API_URL}/pipes/users_status.json?token={TB_TOKEN}&status=new'
+    logging.info(url)
+    response = get_requests_session().get(url)
     users = response.json()['data']
     for user in users:
         try:
