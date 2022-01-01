@@ -134,6 +134,7 @@ def to_tinybird(user_name, tweets):
     chunk = StringIO()
     for tweet in tweets:
         chunk.write(tweet)
+        chunk.write('\n')
 
         if chunk.tell() > 7 * (1024 ** 2):
             data = chunk.getvalue()
