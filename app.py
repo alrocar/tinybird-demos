@@ -79,13 +79,11 @@ def auth():
     auth.set_access_token(result[0], result[1])
     api = tweepy.API(auth)
     user = api.verify_credentials()
-    tb_user = to_tinybird(user.screen_name, 'new', result[0], result[1])
-    import subprocess
-    subprocess.Popen(["python3", "batch.py"])
-    return {'tb_user': {
-                'status': tb_user['status'],
-                'user_name': tb_user['user_name'],},
-            'tw_user': user._json}
+    if get_data(user.screen_name) is None:
+        tb_user = to_tinybird(user.screen_name, 'new', result[0], result[1])
+        import subprocess
+        subprocess.Popen(["python3", "batch.py"])
+    return redirect(f'https://alrocar.github.io/yearinreview?username={user.screen_name}', code=302)
 
 
 def to_tinybird(user_name, status, oauth_token, oauth_secret):
