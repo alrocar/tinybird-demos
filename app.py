@@ -55,7 +55,7 @@ def get_data(user_name):
     response = get_requests_session().get(f'{api_url}/pipes/users_status.json?token={token}&user_name={user_name}')
     data = response.json().get('data', None)
     
-    if data is None:
+    if not data:
         return None
 
     response = get_requests_session().get(f'{api_url}/pipes/users_data.json?token={token}&user_name={user_name}')
