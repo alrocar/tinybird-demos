@@ -35,9 +35,9 @@ def get_users():
     users = response.json()['data']
     for user in users:
         try:
+            update_status(user, 'working')
             logging.info(f'new user: {user["user_name"]}')
             tweets = get_tweets(user['user_name'], user['oauth_token'], user['oauth_secret'])
-            update_status(user, 'working')
             to_tinybird(user['user_name'], tweets)
             call_pupeteer(user['user_name'])
             update_status(user, 'done')
