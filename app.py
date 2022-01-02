@@ -82,7 +82,7 @@ def auth():
     if get_data(user.screen_name) is None:
         tb_user = to_tinybird(user.screen_name, 'new', result[0], result[1])
         import subprocess
-        subprocess.Popen(["python3", "batch.py"])
+        subprocess.Popen(["python3", "batch.py", f"{user.screen_name}"])
     return redirect(f'https://alrocar.github.io/yearinreview?username={user.screen_name}', code=302)
 
 

@@ -11,6 +11,8 @@ from urllib3.util.retry import Retry
 from io import StringIO
 import datetime
 import os
+import sys
+
 
 
 key = os.getenv('CONSUMER_KEY')
@@ -29,7 +31,8 @@ def get_requests_session():
 
 
 def get_users():
-    url = f'{TB_API_URL}/pipes/users_auth.json?token={TB_TOKEN}&status=new'
+    user = sys.argv[1]
+    url = f'{TB_API_URL}/pipes/users_auth.json?token={TB_TOKEN}&status=new&user_name={user}'
     logging.info(url)
     response = get_requests_session().get(url)
     users = response.json()['data']
