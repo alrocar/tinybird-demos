@@ -117,6 +117,8 @@ def get_tweets(user_name, oauth_token, oauth_secret):
                 created_at = tweet.created_at
                 if created_at.year < 2021:
                     ff = True
+                if created_at.year > 2021:
+                    continue
                 if ff:
                     break
                 raw.append(json.dumps({
