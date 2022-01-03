@@ -21,6 +21,7 @@
             border-radius: 3rem;
             display: inline-block;
             position: relative;
+            top: 2px;
         }
         .switch-button .switch-button__label:before {
             transition: .2s;
@@ -39,14 +40,63 @@
         .switch-button .switch-button__checkbox:checked + .switch-button__label:before {
             transform: translateX(2rem);
         }
+
+        .slidecontainer {
+          width: 100%; /* Width of the outside container */
+        }
+
+        /* The slider itself */
+        .slider {
+            -webkit-appearance: none;  /* Override default CSS styles */
+            appearance: none;
+            width: 100%; /* Full-width */
+            height: 3rem; /* Specified height */
+            background: #d2d2d2; /* Grey background */
+            outline: none; /* Remove outline */
+            opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+            -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+            transition: opacity .2s;
+            border-radius: 50px;
+            margin-left: 20px;
+        }
+
+        /* Mouse-over effects */
+        .slider:hover {
+            opacity: 1; /* Fully shown on mouse-over */
+        }
+
+        /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Override default look */
+            appearance: none;
+            width: 3rem; /* Set a specific slider handle width */
+            height: 3rem; /* Slider handle height */
+            background: var(--color-green); /* Green background */
+            cursor: pointer; /* Cursor on hover */
+            border-radius: 50px;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 3rem; /* Set a specific slider handle width */
+            height: 3rem; /* Slider handle height */
+            background: var(--color-green); /* Green background */
+            cursor: pointer; /* Cursor on hover */
+        }
     </style>
 </head>
 <body>
-    <pre><h1>Christmas emojis vs COVID emojis in Twitter. <pre id="tt">Total emojis processed: </pre></h1></pre>
-    <div class="switch-button">
-        <input type="checkbox" name="switch-button" id="switch-label" class="switch-button__checkbox">
-        <label for="switch-label" class="switch-button__label"></label>
+    <pre><h1>Christmas vs COVID emojis in Twitter. <pre id="tt">Total emojis processed: </pre></h1></pre>
+    <div style="display:inline-flex; width:100%">
+        <div class="switch-button">
+            <input type="checkbox" name="switch-button" id="switch-label" class="switch-button__checkbox">
+            <label for="switch-label" class="switch-button__label"></label>
+        </div>
+        <div class="slidecontainer">
+            <input type="range" min="1" max="255" value="50" class="slider" id="myRange">
+        </div>
+        <pre id="demo" style="margin-left: 35px; line-height: 2"></pre>
     </div>
+    
 <script src="https://d3js.org/d3.v3.min.js"></script>
 <script>
 
@@ -67,170 +117,144 @@ var n = get('limit'), // total number of nodes
     m = 2; // number of distinct clusters
 
 // The largest node for each cluster.
-var clusters = new Array(m);
+
 var totalCount = 0
 
 
 url = 'https://api.wadus.tinybird.co/v0/pipes/emoji_count_endpoint.json?token=p.eyJ1IjogImMzNzE2ZTEwLTRjODktNGU4Yi1hMDYzLWUyYTJmNTNlZWQzZCIsICJpZCI6ICJjMmFiMTJkOC1mN2IzLTQ2YjEtYTBkMC1iYjA3OWRjMmNjM2YifQ.nutgsp5IGvLCjV38WW0O7MCgfH3X_hZeXTuszGnmG_o&search_term=covid,Merry%20Christmas&limit=' + n
-fetch(url).then(response => response.json())
+
+function pra() {
+    var clusters = new Array(m);
+    fetch(url).then(response => response.json())
           .then(json => {
-    terms = ['Merry Christmas', 'covid']
+        terms = ['Merry Christmas', 'covid']
 
-    var nodes = json['data'].map((elem) => {
-        var i = terms.indexOf(elem['search_term'])
-            r = Math.max(Math.min(elem['size'], maxRadius), minRadius), 
-            d = {cluster: i, radius: r, ...elem};
-        totalCount += elem['count'];
-        if (!clusters[i] || (r > clusters[i].radius)) clusters[i] = d;
-        return d;
-    });
-
-    document.getElementById("tt").innerHTML = "Total emojis processed: " + totalCount;
-
-    var elems = nodes;
-
-    // Use the pack layout to initialize node positions.
-    d3.layout.pack()
-        .sort(null)
-        .size([width, height])
-        .children(function(d) { return d.values; })
-        .value(function(d) { return d.radius * d.radius; })
-        .nodes({values: d3.nest()
-        .key(function(d) { return d.cluster; })
-        .entries(nodes)});
-
-    window.force = d3.layout.force()
-        .nodes(nodes)
-        .size([width, height])
-        .gravity(.02)
-        .charge(0)
-        .on("tick", tick)
-        .start();
-
-    var svg = d3.select("body").append("svg")
-        .attr("width", width)
-        .attr("height", height)
-
-    var node = svg.selectAll()
-        .data(nodes)
-        .enter().append("text")
-        .attr('id', function(d) { return "_" + d.id; })
-        .attr('text-anchor', 'middle')
-        .style("font-size", function(d) { return d.radius; })
-        .text(function(d) { return d.emoji; })
-        .call(force.drag)
-
-    node.transition()
-        .duration(1750)
-        .delay(function(d, i) { return i; })
-        .attrTween("r", function(d) {
-        var i = d3.interpolate(0, d.radius);
-        return function(t) { return d.radius = i(t); };
+        var nodes = json['data'].map((elem) => {
+            var i = terms.indexOf(elem['search_term'])
+                r = Math.max(Math.min(elem['size'], maxRadius), minRadius), 
+                d = {cluster: i, radius: r, ...elem};
+            totalCount += elem['count'];
+            if (!clusters[i] || (r > clusters[i].radius)) clusters[i] = d;
+            return d;
         });
 
-    function tick(e) {
-    node
-        .each(cluster(15 * e.alpha * e.alpha))
-        .each(collide(0.3))
-        .attr("x", function(d) { return d.x; })
-        .attr("y", function(d) { return d.y; });
-    }
+        document.getElementById("tt").innerHTML = "Total emojis processed: " + totalCount;
 
-    // Move d to be adjacent to the cluster node.
-    function cluster(alpha) {
-        return function(d) {
-            var cluster = clusters[d.cluster];
-            if (cluster === d) return;
-            var x = d.x - cluster.x,
-                y = d.y - cluster.y,
-                l = Math.sqrt(x * x + y * y),
-                r = d.radius + cluster.radius;
-            if (l != r) {
-            l = (l - r) / l * alpha;
-            d.x -= x *= l;
-            d.y -= y *= l;
-            cluster.x += x;
-            cluster.y += y;
-            }
-        };
-    }
+        var elems = nodes;
 
-    // Resolves collisions between d and all other circles.
-    function collide(alpha) {
-        var quadtree = d3.geom.quadtree(nodes);
-        return function(d) {
-            var r = d.radius + maxRadius + Math.max(padding, clusterPadding),
-                nx1 = d.x - r,
-                nx2 = d.x + r,
-                ny1 = d.y - r,
-                ny2 = d.y + r;
-            quadtree.visit(function(quad, x1, y1, x2, y2) {
-            if (quad.point && (quad.point !== d)) {
-                var x = d.x - quad.point.x,
-                    y = d.y - quad.point.y,
+        // Use the pack layout to initialize node positions.
+        d3.layout.pack()
+            .sort(null)
+            .size([width, height])
+            .children(function(d) { return d.values; })
+            .value(function(d) { return d.radius * d.radius; })
+            .nodes({values: d3.nest()
+            .key(function(d) { return d.cluster; })
+            .entries(nodes)});
+
+        window.force = d3.layout.force()
+            .nodes(nodes)
+            .size([width, height])
+            .gravity(.02)
+            .charge(0)
+            .on("tick", tick)
+            .start();
+
+        var svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+
+        var node = svg.selectAll()
+            .data(nodes)
+            .enter().append("text")
+            .attr('id', function(d) { return "_" + d.id; })
+            .attr('text-anchor', 'middle')
+            .style("font-size", function(d) { return d.radius; })
+            .text(function(d) { return d.emoji; })
+            .call(force.drag)
+
+        node.transition()
+            .duration(1750)
+            .delay(function(d, i) { return i; })
+            .attrTween("r", function(d) {
+            var i = d3.interpolate(0, d.radius);
+            return function(t) { return d.radius = i(t); };
+            });
+
+        function tick(e) {
+        node
+            .each(cluster(15 * e.alpha * e.alpha))
+            .each(collide(0.3))
+            .attr("x", function(d) { return d.x; })
+            .attr("y", function(d) { return d.y; });
+        }
+
+        // Move d to be adjacent to the cluster node.
+        function cluster(alpha) {
+            return function(d) {
+                var cluster = clusters[d.cluster];
+                if (cluster === d) return;
+                var x = d.x - cluster.x,
+                    y = d.y - cluster.y,
                     l = Math.sqrt(x * x + y * y),
-                    r = d.radius + quad.point.radius + (d.cluster === quad.point.cluster ? padding : clusterPadding);
-                if (l < r) {
+                    r = d.radius + cluster.radius;
+                if (l != r) {
                 l = (l - r) / l * alpha;
                 d.x -= x *= l;
                 d.y -= y *= l;
-                quad.point.x += x;
-                quad.point.y += y;
+                cluster.x += x;
+                cluster.y += y;
                 }
-            }
-            return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
-            });
-        };
-    }
+            };
+        }
 
-    c = 0;
-    setInterval(function () {
-        pos = Math.floor(Math.random() * 100)
+        // Resolves collisions between d and all other circles.
+        function collide(alpha) {
+            var quadtree = d3.geom.quadtree(nodes);
+            return function(d) {
+                var r = d.radius + maxRadius + Math.max(padding, clusterPadding),
+                    nx1 = d.x - r,
+                    nx2 = d.x + r,
+                    ny1 = d.y - r,
+                    ny2 = d.y + r;
+                quadtree.visit(function(quad, x1, y1, x2, y2) {
+                if (quad.point && (quad.point !== d)) {
+                    var x = d.x - quad.point.x,
+                        y = d.y - quad.point.y,
+                        l = Math.sqrt(x * x + y * y),
+                        r = d.radius + quad.point.radius + (d.cluster === quad.point.cluster ? padding : clusterPadding);
+                    if (l < r) {
+                    l = (l - r) / l * alpha;
+                    d.x -= x *= l;
+                    d.y -= y *= l;
+                    quad.point.x += x;
+                    quad.point.y += y;
+                    }
+                }
+                return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
+                });
+            };
+        }
 
-        totalCount = 0
-        fetch(url).then(response => response.json())
-                  .then(json => {
-                        terms = ['Merry Christmas', 'covid']
+        c = 0;
+        window.aa = setInterval(function () {
+            pos = Math.floor(Math.random() * 100)
 
-                        window.snodes = {}
-                        json['data'].forEach((elem) => {
-                            var i = terms.indexOf(elem['search_term'])
-                                r = Math.max(Math.min(elem['size'], maxRadius), minRadius), 
-                                d = {cluster: i, radius: r, ...elem};
-                            totalCount += elem['count'];
-                            snodes[elem['id']] = elem
-                        });
+            totalCount = 0
+            fetch(url).then(response => response.json())
+                    .then(json => {
+                            terms = ['Merry Christmas', 'covid']
 
-                        var node = svg.selectAll('text')
-                        .text(function(d) {
-                            if (window.numbers) {
-                                return snodes[d.id]['count'];
-                            } else {
-                                return snodes[d.id]['emoji'];
-                            }
-                        })
-                        .style("font-size", function(d) { 
-                            let e = snodes[d.id];
-                            d.radius = Math.max(Math.min(e['size'], maxRadius), minRadius);
-                            return d.radius; 
-                        });
+                            window.snodes = {}
+                            json['data'].forEach((elem) => {
+                                var i = terms.indexOf(elem['search_term'])
+                                    r = Math.max(Math.min(elem['size'], maxRadius), minRadius), 
+                                    d = {cluster: i, radius: r, ...elem};
+                                totalCount += elem['count'];
+                                snodes[elem['id']] = elem
+                            });
 
-                        document.getElementById("tt").innerHTML = "Total emojis processed: " + totalCount;
-                    });
-    }, 2000);
-
-    setInterval(function () {
-        console.log('force drag')
-        force.resume()
-    }, 2000);
-
-    var ch = document.getElementById('switch-label');
-    window.numbers = false
-
-    ch.onchange = function(element) {
-        window.numbers = ch.checked;
-        if (snodes) {
-            var node = svg.selectAll('text')
+                            var node = svg.selectAll('text')
                             .text(function(d) {
                                 if (window.numbers) {
                                     return snodes[d.id]['count'];
@@ -238,9 +262,82 @@ fetch(url).then(response => response.json())
                                     return snodes[d.id]['emoji'];
                                 }
                             })
-        }
-    };
-});
+                            .style("font-size", function(d) { 
+                                let e = snodes[d.id];
+                                d.radius = Math.max(Math.min(e['size'], maxRadius), minRadius);
+                                return d.radius; 
+                            })
+                            .append("title").text(function(d) {
+                                    return snodes[d.id]['count'];
+                                });
+
+                            document.getElementById("tt").innerHTML = "Total emojis processed: " + totalCount;
+                        });
+        }, 2000);
+
+        window.bb = setInterval(function () {
+            console.log('force drag')
+            force.resume()
+        }, 2000);
+    });
+}
+
+
+var ch = document.getElementById('switch-label');
+window.numbers = false
+
+ch.onchange = function(element) {
+    window.numbers = ch.checked;
+    if (snodes) {
+        var node = svg.selectAll('text')
+                        .text(function(d) {
+                            if (window.numbers) {
+                                return snodes[d.id]['count'];
+                            } else {
+                                return snodes[d.id]['emoji'];
+                            }
+                        })
+                        .append("title").text(function(d) {
+                            return snodes[d.id]['count'];
+                        })
+    }
+};
+
+var slider = document.getElementById("myRange");
+var output = document.getElementById("demo");
+output.innerHTML = n; // Display the default slider value
+
+const updateDebounceValue = () => {
+    console.log('debounce')
+    output.innerHTML = slider.value;
+    n = slider.value;
+    url = 'https://api.wadus.tinybird.co/v0/pipes/emoji_count_endpoint.json?token=p.eyJ1IjogImMzNzE2ZTEwLTRjODktNGU4Yi1hMDYzLWUyYTJmNTNlZWQzZCIsICJpZCI6ICJjMmFiMTJkOC1mN2IzLTQ2YjEtYTBkMC1iYjA3OWRjMmNjM2YifQ.nutgsp5IGvLCjV38WW0O7MCgfH3X_hZeXTuszGnmG_o&search_term=covid,Merry%20Christmas&limit=' + n
+    d3.selectAll("svg").remove();
+    window.clearInterval(aa)
+    window.clearInterval(bb)
+    totalCount = 0
+    document.getElementById("tt").innerHTML = "Total emojis processed: " + totalCount;
+    window.force.stop()
+    pra()
+}
+ 
+let debounceTimer;
+ 
+const debounce = (callback, time) => {
+  window.clearTimeout(debounceTimer);
+  debounceTimer = window.setTimeout(callback, time);
+};
+
+// Update the current slider value (each time you drag the slider handle)
+slider.oninput = () => {
+    output.innerHTML = slider.value;
+}
+
+slider.onchange = () => {
+    debounce(updateDebounceValue, 500)
+}
+
+pra()
 
 </script>
 </body>
