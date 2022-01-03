@@ -1,7 +1,52 @@
 <html>
 <meta charset="utf-8">
+<head>
+    <style type="text/css" media="screen">
+        :root {
+            --color-green: #00a878;
+            --color-red: #fe5e41;
+            --color-button: #fdffff;
+            --color-black: #2d2d2d;
+        }
+        .switch-button {
+            display: inline-block;
+        }
+        .switch-button .switch-button__checkbox {
+            display: none;
+        }
+        .switch-button .switch-button__label {
+            background-color: var(--color-red);
+            width: 5rem;
+            height: 3rem;
+            border-radius: 3rem;
+            display: inline-block;
+            position: relative;
+        }
+        .switch-button .switch-button__label:before {
+            transition: .2s;
+            display: block;
+            position: absolute;
+            width: 3rem;
+            height: 3rem;
+            background-color: var(--color-button);
+            content: '';
+            border-radius: 50%;
+            box-shadow: inset 0px 0px 0px 1px var(--color-black);
+        }
+        .switch-button .switch-button__checkbox:checked + .switch-button__label {
+            background-color: var(--color-green);
+        }
+        .switch-button .switch-button__checkbox:checked + .switch-button__label:before {
+            transform: translateX(2rem);
+        }
+    </style>
+</head>
 <body>
     <pre><h1>Christmas emojis vs COVID emojis in Twitter. <pre id="tt">Total emojis processed: </pre></h1></pre>
+    <div class="switch-button">
+        <input type="checkbox" name="switch-button" id="switch-label" class="switch-button__checkbox">
+        <label for="switch-label" class="switch-button__label"></label>
+    </div>
 <script src="https://d3js.org/d3.v3.min.js"></script>
 <script>
 
@@ -54,7 +99,7 @@ fetch(url).then(response => response.json())
         .key(function(d) { return d.cluster; })
         .entries(nodes)});
 
-    var force = d3.layout.force()
+    window.force = d3.layout.force()
         .nodes(nodes)
         .size([width, height])
         .gravity(.02)
@@ -66,14 +111,14 @@ fetch(url).then(response => response.json())
         .attr("width", width)
         .attr("height", height)
 
-    var node = svg.selectAll("text")
+    var node = svg.selectAll()
         .data(nodes)
         .enter().append("text")
         .attr('id', function(d) { return "_" + d.id; })
         .attr('text-anchor', 'middle')
         .style("font-size", function(d) { return d.radius; })
         .text(function(d) { return d.emoji; })
-        .call(force.drag);
+        .call(force.drag)
 
     node.transition()
         .duration(1750)
@@ -147,22 +192,54 @@ fetch(url).then(response => response.json())
                   .then(json => {
                         terms = ['Merry Christmas', 'covid']
 
-                        var nodes = json['data'].map((e) => {
-                            totalCount += e['count'];
-                            var node = svg.select('#_' + e['id'])
-                                          .style("font-size", function(d) { 
-                                              d.radius = Math.max(Math.min(e['size'], maxRadius), minRadius);
-                                              return d.radius; 
-                                          });
+                        window.snodes = {}
+                        json['data'].forEach((elem) => {
+                            var i = terms.indexOf(elem['search_term'])
+                                r = Math.max(Math.min(elem['size'], maxRadius), minRadius), 
+                                d = {cluster: i, radius: r, ...elem};
+                            totalCount += elem['count'];
+                            snodes[elem['id']] = elem
                         });
+
+                        var node = svg.selectAll('text')
+                        .text(function(d) {
+                            if (window.numbers) {
+                                return snodes[d.id]['count'];
+                            } else {
+                                return snodes[d.id]['emoji'];
+                            }
+                        })
+                        .style("font-size", function(d) { 
+                            let e = snodes[d.id];
+                            d.radius = Math.max(Math.min(e['size'], maxRadius), minRadius);
+                            return d.radius; 
+                        });
+
                         document.getElementById("tt").innerHTML = "Total emojis processed: " + totalCount;
                     });
-    }, 10000);
+    }, 2000);
 
     setInterval(function () {
         console.log('force drag')
         force.resume()
     }, 2000);
+
+    var ch = document.getElementById('switch-label');
+    window.numbers = false
+
+    ch.onchange = function(element) {
+        window.numbers = ch.checked;
+        if (snodes) {
+            var node = svg.selectAll('text')
+                            .text(function(d) {
+                                if (window.numbers) {
+                                    return snodes[d.id]['count'];
+                                } else {
+                                    return snodes[d.id]['emoji'];
+                                }
+                            })
+        }
+    };
 });
 
 </script>
