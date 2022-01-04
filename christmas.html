@@ -229,7 +229,9 @@ function pra() {
         function collide(alpha) {
             var quadtree = d3.geom.quadtree(nodes);
             return function(d) {
-                var r = d.radius + maxRadius + Math.max(padding, clusterPadding),
+                let pp = window.numbers ? clusterPadding * 14 : clusterPadding
+                let p = window.numbers ? padding * 6 : padding
+                var r = d.radius + maxRadius + Math.max(p, pp),
                     nx1 = d.x - r,
                     nx2 = d.x + r,
                     ny1 = d.y - r,
@@ -239,7 +241,7 @@ function pra() {
                     var x = d.x - quad.point.x,
                         y = d.y - quad.point.y,
                         l = Math.sqrt(x * x + y * y),
-                        r = d.radius + quad.point.radius + (d.cluster === quad.point.cluster ? padding : clusterPadding);
+                        r = d.radius + quad.point.radius + (d.cluster === quad.point.cluster ? p : pp);
                     if (l < r) {
                     l = (l - r) / l * alpha;
                     d.x -= x *= l;
