@@ -182,7 +182,7 @@ function pra() {
             .on("tick", tick)
             .start();
 
-        var svg = d3.select("body").append("svg")
+        window.svg = d3.select("body").append("svg")
             .attr("width", width)
             .attr("height", height)
 
@@ -193,6 +193,7 @@ function pra() {
             .attr('text-anchor', 'middle')
             .style("font-size", function(d) { return d.radius; })
             .style("color", "#ccc")
+            .style("font-family", "monospace")
             .text(function(d) { return d.emoji; })
             .call(force.drag)
 
