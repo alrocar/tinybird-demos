@@ -279,6 +279,8 @@ function pra() {
                                 totalCount += elem['count'];
                                 snodes[elem['id']] = elem
                             });
+                            document.getElementById("tt").innerHTML = "Total emojis processed: " + totalCount;
+                            count()
 
                             var node = svg.selectAll('text')
                             .text(function(d) {
@@ -297,20 +299,20 @@ function pra() {
                                     return snodes[d.id] ? snodes[d.id]['count'] : '';
                                 });
 
-                            document.getElementById("tt").innerHTML = "Total emojis processed: " + totalCount;
-                            count()
-                            window.aa = setInterval(function () {
+                            const aa = setInterval(function () {
                                 ff()
                             }, 10000);
+                            window.aa = aa
                         });
         }
 
         ff()
         
 
-        window.bb = setInterval(function () {
+        const bb = setInterval(function () {
             force.resume()
         }, 2000);
+        window.bb = bb
     });
 }
 
@@ -344,12 +346,12 @@ const updateDebounceValue = () => {
     n = slider.value;
     url = 'https://api.wadus.tinybird.co/v0/pipes/emoji_count_endpoint.json?token=p.eyJ1IjogImMzNzE2ZTEwLTRjODktNGU4Yi1hMDYzLWUyYTJmNTNlZWQzZCIsICJpZCI6ICJjMmFiMTJkOC1mN2IzLTQ2YjEtYTBkMC1iYjA3OWRjMmNjM2YifQ.nutgsp5IGvLCjV38WW0O7MCgfH3X_hZeXTuszGnmG_o&search_term=covid,Merry%20Christmas&limit=' + n
     d3.selectAll("svg").remove();
-    window.clearInterval(ss)
-    window.clearInterval(aa)
-    window.clearInterval(bb)
+    window.clearInterval(window.ss)
+    window.clearInterval(window.aa)
+    window.clearInterval(window.bb)
+    window.force.stop()
     totalCount = 0
     document.getElementById("tt").innerHTML = "Total emojis processed: " + totalCount;
-    window.force.stop()
     pra()
 }
  
@@ -373,13 +375,14 @@ pra()
 
 var count = function() {
     if (window.ss) {
-        window.clearInterval(ss)
+        window.clearInterval(window.ss)
     }
-    window.ss = setInterval(function () {
+    const ss = setInterval(function () {
         let a = parseInt(document.getElementById("tt").innerHTML.split(':')[1].trim(), 10)
         a += Math.floor(Math.random() * 4);
         document.getElementById("tt").innerHTML = "Total emojis processed: " + a;
     }, 100)
+    window.ss = ss
 }
 
 
