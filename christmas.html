@@ -5,11 +5,19 @@
         :root {
             --color-green: #00a878;
             --color-red: #fe5e41;
-            --color-button: #fdffff;
-            --color-black: #2d2d2d;
+            --color-button: #d2d2d2;
+            --color-white: #fff;
         }
         .switch-button {
             display: inline-block;
+            opacity: 0.7;
+            -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+            transition: opacity .2s;
+        }
+
+        .switch-button:hover {
+            display: inline-block;
+            opacity: 1;
         }
         .switch-button .switch-button__checkbox {
             display: none;
@@ -32,7 +40,7 @@
             background-color: var(--color-button);
             content: '';
             border-radius: 50%;
-            box-shadow: inset 0px 0px 0px 1px var(--color-black);
+            box-shadow: inset 0px 0px 0px 1px var(--color-white);
         }
         .switch-button .switch-button__checkbox:checked + .switch-button__label {
             background-color: var(--color-green);
@@ -82,9 +90,17 @@
             background: var(--color-green); /* Green background */
             cursor: pointer; /* Cursor on hover */
         }
+
+        pre, text {
+            color: #ccc;
+        }
+
+        text {
+            fill: #ccc;
+        }
     </style>
 </head>
-<body>
+<body style="background: #2d2d2d">
     <pre><h1>Christmas vs COVID emojis in Twitter. <pre id="tt">Total emojis processed: </pre></h1></pre>
     <div style="display:inline-flex; width:100%">
         <div class="switch-button">
@@ -92,7 +108,7 @@
             <label for="switch-label" class="switch-button__label"></label>
         </div>
         <div class="slidecontainer">
-            <input type="range" min="1" max="255" value="50" class="slider" id="myRange">
+            <input type="range" min="1" max="128" value="50" class="slider" id="myRange">
         </div>
         <pre id="demo" style="margin-left: 35px; line-height: 2"></pre>
     </div>
@@ -170,6 +186,7 @@ function pra() {
             .attr('id', function(d) { return "_" + d.id; })
             .attr('text-anchor', 'middle')
             .style("font-size", function(d) { return d.radius; })
+            .style("color", "#ccc")
             .text(function(d) { return d.emoji; })
             .call(force.drag)
 
