@@ -98,6 +98,12 @@
         text {
             fill: #ccc;
         }
+
+        svg {
+            -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+            transition: opacity .2s;
+        }
+        
     </style>
 </head>
 <body style="background: #2d2d2d">
@@ -256,7 +262,7 @@ function pra() {
         }
 
         c = 0;
-        window.aa = setInterval(function () {
+        var ff = function() {
             pos = Math.floor(Math.random() * 100)
 
             totalCount = 0
@@ -276,9 +282,9 @@ function pra() {
                             var node = svg.selectAll('text')
                             .text(function(d) {
                                 if (window.numbers) {
-                                    return snodes[d.id]['count'];
+                                    return snodes[d.id] ? snodes[d.id]['count'] : '';
                                 } else {
-                                    return snodes[d.id]['emoji'];
+                                    return snodes[d.id] ? snodes[d.id]['emoji'] : '';
                                 }
                             })
                             .style("font-size", function(d) { 
@@ -287,15 +293,21 @@ function pra() {
                                 return d.radius; 
                             })
                             .append("title").text(function(d) {
-                                    return snodes[d.id]['count'];
+                                    return snodes[d.id] ? snodes[d.id]['count'] : '';
                                 });
 
                             document.getElementById("tt").innerHTML = "Total emojis processed: " + totalCount;
+                            count()
+                            window.aa = setInterval(function () {
+                                ff()
+                            }, 10000);
                         });
-        }, 2000);
+        }
+
+        ff()
+        
 
         window.bb = setInterval(function () {
-            console.log('force drag')
             force.resume()
         }, 2000);
     });
@@ -311,13 +323,13 @@ ch.onchange = function(element) {
         var node = svg.selectAll('text')
                         .text(function(d) {
                             if (window.numbers) {
-                                return snodes[d.id]['count'];
+                                return snodes[d.id] ? snodes[d.id]['count'] : '';
                             } else {
-                                return snodes[d.id]['emoji'];
+                                return snodes[d.id]? snodes[d.id]['emoji'] : '';
                             }
                         })
                         .append("title").text(function(d) {
-                            return snodes[d.id]['count'];
+                            return snodes[d.id] ? snodes[d.id]['count'] : '';
                         })
     }
 };
@@ -327,11 +339,11 @@ var output = document.getElementById("demo");
 output.innerHTML = n; // Display the default slider value
 
 const updateDebounceValue = () => {
-    console.log('debounce')
     output.innerHTML = slider.value;
     n = slider.value;
     url = 'https://api.wadus.tinybird.co/v0/pipes/emoji_count_endpoint.json?token=p.eyJ1IjogImMzNzE2ZTEwLTRjODktNGU4Yi1hMDYzLWUyYTJmNTNlZWQzZCIsICJpZCI6ICJjMmFiMTJkOC1mN2IzLTQ2YjEtYTBkMC1iYjA3OWRjMmNjM2YifQ.nutgsp5IGvLCjV38WW0O7MCgfH3X_hZeXTuszGnmG_o&search_term=covid,Merry%20Christmas&limit=' + n
     d3.selectAll("svg").remove();
+    window.clearInterval(ss)
     window.clearInterval(aa)
     window.clearInterval(bb)
     totalCount = 0
@@ -357,6 +369,18 @@ slider.onchange = () => {
 }
 
 pra()
+
+var count = function() {
+    if (window.ss) {
+        window.clearInterval(ss)
+    }
+    window.ss = setInterval(function () {
+        let a = parseInt(document.getElementById("tt").innerHTML.split(':')[1].trim(), 10)
+        a += Math.floor(Math.random() * 4);
+        document.getElementById("tt").innerHTML = "Total emojis processed: " + a;
+    }, 100)
+}
+
 
 </script>
 </body>
