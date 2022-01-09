@@ -298,15 +298,15 @@ function pra() {
                             .append("title").text(function(d) {
                                     return snodes[d.id] ? snodes[d.id]['count'] : '';
                                 });
-
-                            // const aa = setInterval(function () {
-                            //     ff()
-                            // }, 10000);
-                            // window.aa = aa
                         });
         }
 
         ff()
+
+        const aa = setInterval(function () {
+            ff()
+        }, 10000);
+        window.aa = aa
         
 
         const bb = setInterval(function () {
@@ -342,12 +342,13 @@ var output = document.getElementById("demo");
 output.innerHTML = n; // Display the default slider value
 
 const updateDebounceValue = () => {
+    console.log('debounce')
     output.innerHTML = slider.value;
     n = slider.value;
     url = 'https://api.wadus.tinybird.co/v0/pipes/emoji_count_endpoint.json?token=p.eyJ1IjogImMzNzE2ZTEwLTRjODktNGU4Yi1hMDYzLWUyYTJmNTNlZWQzZCIsICJpZCI6ICJjMmFiMTJkOC1mN2IzLTQ2YjEtYTBkMC1iYjA3OWRjMmNjM2YifQ.nutgsp5IGvLCjV38WW0O7MCgfH3X_hZeXTuszGnmG_o&search_term=covid,Merry%20Christmas&limit=' + n
     d3.selectAll("svg").remove();
     window.clearInterval(window.ss)
-    // window.clearInterval(window.aa)
+    window.clearInterval(window.aa)
     window.clearInterval(window.bb)
     window.force.stop()
     totalCount = 0
@@ -364,10 +365,12 @@ const debounce = (callback, time) => {
 
 // Update the current slider value (each time you drag the slider handle)
 slider.oninput = () => {
+    console.log('oninput')
     output.innerHTML = slider.value;
 }
 
 slider.onchange = () => {
+    console.log('onchange')
     debounce(updateDebounceValue, 500)
 }
 
