@@ -1,15 +1,26 @@
 NODE countt
 SQL >
-    WITH
-        (select regex from emoji_regex) as emoji_regex_,
-        extractAll(tweet, assumeNotNull(emoji_regex_)) as emojis
-    SELECT
-        toStartOfHour(date) date,
-        search_term,
-        arrayJoin(emojis) emoji,
-        count() count
-    FROM tweets
-    GROUP BY date, search_term, emoji
 
-TYPE Materialized
+    WITH
+        (
+            SELECT regex
+            FROM emoji_regex
+        ) AS emoji_regex_,
+        extractAll(tweet, assumeNotNull(emoji_regex_)) AS emojis
+    SELECT
+        toStartOfHour(date) AS date,
+        search_term,
+        batch,
+        arrayJoin(emojis) AS emoji,
+        count() AS count
+    FROM tweets_s
+    GROUP BY
+        date,
+        search_term,
+        batch,
+        emoji
+
+TYPE materialized
 DATASOURCE emoji_count
+
+

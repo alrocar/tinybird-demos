@@ -1,0 +1,9 @@
+NODE user_pipe_7508_0
+SQL >
+
+    %
+    SELECT * FROM user_summary
+    WHERE user_name = {{String(user_name)}}
+    order by date desc limit 1
+
+

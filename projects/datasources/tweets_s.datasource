@@ -1,0 +1,13 @@
+VERSION 0
+
+
+SCHEMA >
+    `date` DateTime `json:$.date`,
+    `search_term` LowCardinality(String) `json:$.search_term`,
+    `batch` LowCardinality(String) `json:$.batch`,
+    `tweet` String `json:$.tweet`
+    
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYear(date)"
+ENGINE_SORTING_KEY "search_term, date"

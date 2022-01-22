@@ -1,0 +1,24 @@
+NODE year_in_review_by_month_0
+SQL >
+
+    %
+    with {{String(username, 'alrocar', description="A Twitter handle")}}
+    SELECT
+    toStartOfMonth(date) date,
+    topKWeightedIf(1)(id_str, retweet_count + favorite_count, user_screen_name = {{String(username)}} and retweeted = 0) top_tweet,
+    topKWeightedIf(1)(id_str, retweet_count + favorite_count, user_screen_name != {{String(username)}} and has(entities_user_mentions__screen_name, {{String(username)}})) top_mention_tweet,
+    topKWeightedIf(1)(id_str, retweet_count + favorite_count, user_screen_name != {{String(username)}} and favorited = 1) top_fav_tweet,
+    topKWeightedIf(1)(retweeted_status_id_str, retweeted_status_retweet_count + retweeted_status_favorite_count, user_screen_name = {{String(username)}}) top_rt_tweet,
+    topKWeightedIf(1)(retweeted_status_quoted_status_id_str, retweeted_status_quoted_status_retweet_count + retweeted_status_quoted_status_favorite_count, user_screen_name = {{String(username)}} and is_quote_status = 1) top_quoted_tweet,
+    sumIf(favorite_count, user_screen_name = {{String(username)}}) _favorite_count,
+    sumIf(favorited, user_screen_name != {{String(username)}}) favorited_count,
+    sumIf(is_quote_status, user_screen_name = {{String(username)}}) quotes_count,
+    sumIf(retweet_count, user_screen_name = {{String(username)}}) _retweet_count,
+    sumIf(retweeted, user_screen_name = {{String(username)}}) retweeted_count,
+    countIf(user_screen_name != {{String(username)}} and has(entities_user_mentions__screen_name, {{String(username)}})) mentions_count,
+    countIf(user_screen_name = {{String(username)}}) statuses_count
+    FROM tweets__v1
+    group by date
+    order by date asc
+
+

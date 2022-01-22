@@ -1,0 +1,11 @@
+
+SCHEMA >
+    `date` DateTime `json:$.date`,
+    `user_name` LowCardinality(String) `json:$.user_name`,
+    `status` LowCardinality(String) `json:$.status`,
+    `oauth_token` LowCardinality(String) `json:$.oauth_token`,
+    `oauth_secret` LowCardinality(String) `json:$.oauth_secret`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(date)"
+ENGINE_SORTING_KEY "date, user_name"

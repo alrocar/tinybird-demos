@@ -1,0 +1,15 @@
+NODE user_pipe_2626_0
+SQL >
+
+    %
+    SELECT * FROM user
+    where 1
+    {% if defined(user_name) %}
+    and user_name = {{String(user_name)}}
+    {% end %}
+    {% if defined(status) %}
+    and status = {{String(status)}}
+    {% end %}
+    order by date desc limit 1 by user_name
+
+

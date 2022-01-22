@@ -39,14 +39,36 @@ SQL >
     LIMIT 1 by search_term
 
 
+NODE emoji_count_endpoint_3
+SQL >
+
+    %
+    WITH (SELECT topK(2)(count) from emoji_count_endpoint_1 limit 1) as mm
+    select
+    mm[1] / mm[2]
+
+
 
 NODE emoji_count_endpoint_2
 SQL >
 
-    WITH (SELECT (groupArray(count), groupArray(cityHash64(search_term))) FROM emoji_count_endpoint_1) as max_count
+    WITH
+    (SELECT (groupArray(count), groupArray(cityHash64(search_term))) FROM emoji_count_endpoint_1) as max_count,
+    (SELECT * FROM emoji_count_endpoint_3) AS multiplier
     select
     *,
-    count/transform(cityHash64(search_term), max_count.2, max_count.1) * 1000 as size
+    count/transform(cityHash64(search_term), arrayConcat([0], max_count.2), arrayConcat([0], max_count.1)) * 1000 * if(multiplier > 2, 2, multiplier) / if(search_term == 'covid', 2, 1) as size
     from emoji_count_pipe_6543_0
+
+
+
+
+
+
+
+NODE emoji_count_endpoint_4
+SQL >
+
+    SELECT sum(count) FROM emoji_count_mv
 
 

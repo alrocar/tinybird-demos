@@ -1,0 +1,9 @@
+
+SCHEMA >
+    `date` DateTime `json:$.date`,
+    `data` String `json:$.data`,
+    `user_name` LowCardinality(String) `json:$.user_name`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(date)"
+ENGINE_SORTING_KEY "date, user_name"

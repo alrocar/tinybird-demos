@@ -1,0 +1,51 @@
+NODE user_pipe_2626_0
+SQL >
+
+    %
+    SELECT date, user_name, status FROM user
+    where 1
+    {% if defined(user_name) %}
+    and user_name = {{String(user_name)}}
+    {% end %}
+    {% if defined(status) %}
+    and status = {{String(status)}}
+    and user_name not in (select user_name from user where status = 'pup')
+    {% end %}
+    order by date desc limit 1 by user_name
+
+
+
+NODE users_status_1
+SQL >
+
+    %
+    {%set status = 'new' %}
+    SELECT date, user_name, status FROM user
+    where 1
+    {% if defined(user_name) %}
+    and user_name = {{String(user_name)}}
+    {% end %}
+    {% if defined(status) %}
+    and status = {{String(status)}}
+    and user_name not in (select user_name from user where status = 'pup')
+    {% end %}
+    order by date desc limit 1 by user_name
+
+
+
+NODE users_status_2
+SQL >
+
+    %
+    SELECT date, user_name, status FROM user
+    where 1
+    {% if defined(user_name) %}
+    and user_name = {{String(user_name)}}
+    {% end %}
+    {% if defined(status) %}
+    and status = {{String(status)}}
+    {% end %}
+    and user_name not in (select user_name from user where status = 'pup')
+    order by date desc limit 1 by user_name
+
+
