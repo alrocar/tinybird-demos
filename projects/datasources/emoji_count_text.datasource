@@ -1,0 +1,11 @@
+VERSION 0
+
+SCHEMA >
+    `date` DateTime,
+    `emoji` String,
+    `count` SimpleAggregateFunction(sum, UInt64)
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(date)"
+ENGINE_PRIMARY_KEY "date"
+ENGINE_SORTING_KEY "date, emoji"

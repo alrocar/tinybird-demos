@@ -1,0 +1,36 @@
+
+
+NODE countt
+SQL >
+
+    WITH
+        (
+            SELECT regex
+            FROM emoji_regex
+        ) AS emoji_regex_,
+        (
+          if(truncated, full_text, text)
+        ) AS text,
+        (
+            if(retweeted_status_quoted_status_truncated, retweeted_status_quoted_status_full_text, retweeted_status_quoted_status_text)
+        ) AS retweeted_status_quoted_status_text,
+        (
+            if(retweeted_status_truncated, retweeted_status_full_text, retweeted_status_text)
+        ) AS retweeted_status_text
+    SELECT
+        toStartOfHour(parseDateTimeBestEffort(created_at)) AS date,
+        --search_term,
+        --batch,
+        arrayJoin(extractAll(concat(text, ifNull(retweeted_status_quoted_status_text, ''), ifNull(retweeted_status_text, '')), assumeNotNull(emoji_regex_))) AS emoji,
+        count() AS count
+    FROM tweets_text
+    GROUP BY
+        date,
+        --search_term,
+        --batch,
+        emoji
+
+TYPE materialized
+DATASOURCE emoji_count_text
+
+

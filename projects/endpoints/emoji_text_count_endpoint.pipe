@@ -1,0 +1,48 @@
+NODE emoji_count_text_pipe_6543_0
+SQL >
+
+    %
+    SELECT
+      sum(count) count,
+      emoji,
+      cityHash64(emoji) as id
+    FROM emoji_count_text
+    GROUP by emoji
+    ORDER BY count desc
+    LIMIT {{UInt8(limit, 20)}}
+
+
+
+NODE emoji_count_text_endpoint_1
+SQL >
+
+    %
+    SELECT 
+    sum(count) count
+    FROM emoji_count_text
+    ORDER BY count desc
+    LIMIT 1
+
+
+NODE emoji_count_text_endpoint_3
+SQL >
+
+    %
+    WITH (SELECT topK(2)(count) from emoji_count_text_endpoint_1 limit 1) as mm
+    select
+    mm[1] / mm[2]
+
+
+
+NODE emoji_count_text_endpoint_2
+SQL >
+
+    WITH
+    (SELECT max(count) FROM emoji_count_text_endpoint_1) as max_count,
+    (SELECT * FROM emoji_count_text_endpoint_3) AS multiplier
+    select
+    *,
+    count/max_count * 1000 * if(multiplier > 2, 2, multiplier) as size
+    from emoji_count_text_pipe_6543_0
+
+

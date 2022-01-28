@@ -1,0 +1,18 @@
+VERSION 0
+
+
+SCHEMA >
+    `created_at` String `json:$.created_at`,
+    `retweeted_status_quoted_status_text` Nullable(String) `json:$.retweeted_status.quoted_status.text`,
+    `retweeted_status_quoted_status_full_text` Nullable(String) `json:$.retweeted_status.quoted_status.extended_tweet.text`,
+    `retweeted_status_quoted_status_truncated` Nullable(UInt8) `json:$.retweeted_status.quoted_status.truncated`,
+    `retweeted_status_text` Nullable(String) `json:$.retweeted_status.text`,
+    `retweeted_status_full_text` Nullable(String) `json:$.retweeted_status.extended_tweet.full_text`,
+    `retweeted_status_truncated` Nullable(UInt8) `json:$.retweeted_status.truncated`,
+    `text` String `json:$.text`,
+    `full_text` Nullable(String) `json:$.extended_tweet.full_text`,
+    `truncated` UInt8 `json:$.truncated`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "moduloOrZero(cityHash64(created_at), 9)"
+ENGINE_SORTING_KEY "created_at"
