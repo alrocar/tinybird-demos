@@ -196,48 +196,48 @@ def create_stripes(data, emojis):
 
 def run():
     print('here we go again bitch...')
-    # since_id = get_last_tweet_id(tb_api)
-    # tweets_raw = get_tweets(since_id)
-    # tweets = []
-    # for tweet in tweets_raw:
-    #     tweet = tweet._json
-    #     text = ''
-    #     try:
-    #         if tweet['truncated']:
-    #             text = tweet['extended_tweet']['full_text']
-    #         else:
-    #             text = tweet['text']
-    #     except Exception as e:
-    #         print(e)
+    since_id = get_last_tweet_id(tb_api)
+    tweets_raw = get_tweets(since_id)
+    tweets = []
+    for tweet in tweets_raw:
+        tweet = tweet._json
+        text = ''
+        try:
+            if tweet['truncated']:
+                text = tweet['extended_tweet']['full_text']
+            else:
+                text = tweet['text']
+        except Exception as e:
+            print(e)
         
-    #     try:
-    #         if tweet.get('retweeted_status'):
-    #             if tweet.get('retweeted_status')['truncated']:
-    #                 text += tweet['retweeted_status'].get('extended_tweet', {})['full_text']
-    #             else:
-    #                 text += tweet['retweeted_status'].get('text')
-    #     except Exception as e:
-    #         print(e)
+        try:
+            if tweet.get('retweeted_status'):
+                if tweet.get('retweeted_status')['truncated']:
+                    text += tweet['retweeted_status'].get('extended_tweet', {})['full_text']
+                else:
+                    text += tweet['retweeted_status'].get('text')
+        except Exception as e:
+            print(e)
         
-    #     try:
-    #         if tweet.get('quoted_status'):
-    #             q = tweet.get('quoted_status')
-    #             if q['truncated']:
-    #                 text += q.get('extended_tweet', {})['full_text']
-    #             else:
-    #                 text += q.get('text')
-    #     except Exception as e:
-    #         print(e)
-    #     # text = " ".join(re.sub("([^0-9A-Za-z \t])|(\w+:\/\/\S+)", "", text).split())
-    #     if text:
-    #         tweets.append({'search_term': batch, 'batch': batch, 'id': tweet['id'], 'date': parsedate_to_datetime(str(tweet['created_at'])).strftime("%Y-%m-%d %H:%M:%S"), 'text': text, 'polarity': enrich_polarity(text), 'tweet': text})
-    # to_tinybird(tweets, datasource)
-    # to_tinybird(tweets, 'tweets_s__v0')
-    # polarity = get_polarity(tb_api)
-    # if polarity:
-    #     hue = polarity2hue(polarity)
-    #     emoji = get_emoji(tb_api)[0]['emoji']
-    #     update_avatar(hue, polarity, emoji)
+        try:
+            if tweet.get('quoted_status'):
+                q = tweet.get('quoted_status')
+                if q['truncated']:
+                    text += q.get('extended_tweet', {})['full_text']
+                else:
+                    text += q.get('text')
+        except Exception as e:
+            print(e)
+        # text = " ".join(re.sub("([^0-9A-Za-z \t])|(\w+:\/\/\S+)", "", text).split())
+        if text:
+            tweets.append({'search_term': batch, 'batch': batch, 'id': tweet['id'], 'date': parsedate_to_datetime(str(tweet['created_at'])).strftime("%Y-%m-%d %H:%M:%S"), 'text': text, 'polarity': enrich_polarity(text), 'tweet': text})
+    to_tinybird(tweets, datasource)
+    to_tinybird(tweets, 'tweets_s__v0')
+    polarity = get_polarity(tb_api)
+    if polarity:
+        hue = polarity2hue(polarity)
+        emoji = get_emoji(tb_api)[0]['emoji']
+        update_avatar(hue, polarity, emoji)
 
     data = get_polarity_mvng_avg(tb_api)
     emojis = get_emoji(tb_api, limit=150)
