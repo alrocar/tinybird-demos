@@ -49,8 +49,8 @@ def get_polarity_mvng_avg(tb_api):
 
 
 def get_tweets(since_id=None, user=None):
-    # for page in tweepy.Cursor(api.user_timeline, id=TWITTER_HANDLE, count=200).pages(20):
     raw = []
+    # for page in tweepy.Cursor(api.user_timeline, id=batch, count=200, exclude_replies=False).pages(15):
     for page in tweepy.Cursor(api.home_timeline, since_id=since_id, count=200).pages(15):
         for tweet in page:
             raw.append(tweet)
@@ -192,7 +192,8 @@ def run():
         except Exception as e:
             print(e)
         text = " ".join(re.sub("([^0-9A-Za-z \t])|(\w+:\/\/\S+)", "", text).split())
-        tweets.append({'batch': batch, 'id': tweet['id'], 'date': parsedate_to_datetime(str(tweet['created_at'])).strftime("%Y-%m-%d %H:%M:%S"), 'text': text, 'polarity': enrich_polarity(text)})
+        if text:
+            tweets.append({'batch': batch, 'id': tweet['id'], 'date': parsedate_to_datetime(str(tweet['created_at'])).strftime("%Y-%m-%d %H:%M:%S"), 'text': text, 'polarity': enrich_polarity(text)})
     to_tinybird(tweets, datasource)
     polarity = get_polarity(tb_api)
     if polarity:
