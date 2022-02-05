@@ -51,7 +51,7 @@ def get_polarity_mvng_avg(tb_api):
 def get_tweets(since_id=None, user=None):
     raw = []
     # for page in tweepy.Cursor(api.user_timeline, id=batch, count=200, exclude_replies=False).pages(15):
-    for page in tweepy.Cursor(api.home_timeline, since_id=since_id, count=200).pages(15):
+    for page in tweepy.Cursor(api.home_timeline, since_id=since_id, count=200, exclude_replies=False).pages(15):
         for tweet in page:
             raw.append(tweet)
     return raw
