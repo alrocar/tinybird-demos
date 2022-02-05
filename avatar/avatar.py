@@ -111,7 +111,7 @@ def update_avatar(hue, polarity):
     img = Image.open(f'{path}/avatar.png').convert('RGBA')
     arr = np.array(img)
     new_img = Image.fromarray(shift_hue(arr, hue), 'RGBA')
-    avatar = f'_avatar{str(hue)}.png'
+    avatar = f'_avatar.png'
     new_img.save(avatar)
     api.update_profile_image(avatar)
     to_tinybird([{'batch': batch, 'date': str(datetime.now()), 'polarity': polarity, 'hue': hue}], 'polarity_log')
