@@ -178,7 +178,6 @@ def create_stripes(data, emojis):
         draw = ImageDraw.Draw(icon)
         draw.text((0, 0), emoji['emoji'], fill="#faa", embedded_color=True, font=fnt)
         # draw.text((10*i, 0), emoji['emoji'], fill="#faa", embedded_color=True, font=fnt)
-        icon.save(f'{i}.png')
         out = icon.resize((10, 10))
         rgba = out.convert("RGBA")
         datas = rgba.getdata()
