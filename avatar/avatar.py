@@ -71,9 +71,9 @@ def parse_tweets(tweets):
 def enrich_polarity(tweet):
     try:
         analysis = TextBlob(tweet)
-        #language = analysis.detect_language()
-        #if language != 'en':
-            #analysis = analysis.translate(to='en')
+        language = analysis.detect_language()
+        if language != 'en':
+            analysis = analysis.translate(to='en')
         return round(analysis.sentiment.polarity, 4)
     except Exception:
         pass
