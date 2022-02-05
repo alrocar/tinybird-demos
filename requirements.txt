@@ -1,13 +1,11 @@
 Flask
 gunicorn
 tweepy
-requests
 urllib3
 requests==2.27.1
-tweepy==3.10.0
 textblob==0.15.3
 numpy==1.19.5
 pillow==8.1.0
 nltk
-git+https://github.com/tinybirdco/tinybird-python-sdk@master#egg=tinybird-python-sdk
+git+https://alrocar@github.com/tinybirdco/tinybird-python-sdk@master#egg=tinybird-python-sdk
 APScheduler==3.8.1
