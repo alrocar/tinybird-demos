@@ -6,7 +6,7 @@ from email.utils import parsedate_to_datetime
 
 import numpy as np
 import tweepy
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from tb.api import API
 from tb.datasource import Datasource
 from textblob import TextBlob
@@ -37,6 +37,15 @@ def get_last_tweet_id(tb_api):
     if len(data) == 0:
         return
     return data[0]['since_id']
+
+
+def get_emoji(tb_api):
+    url = f'pipes/emoji_count_endpoint.json?search_term={batch}'
+    response = tb_api.get(url)
+    data = response.json()['data']
+    if len(data) == 0:
+        return
+    return data[0]['emoji']
 
 
 def get_polarity_mvng_avg(tb_api):
@@ -106,12 +115,15 @@ def polarity2hue(polarity):
     return (polarity + 100) / step_polarity * step / 360 #* 1.8/720
 
 
-def update_avatar(hue, polarity):
+def update_avatar(hue, polarity, emoji):
     path = pathlib.Path(__file__).parent.absolute()
     img = Image.open(f'{path}/avatar.png').convert('RGBA')
     arr = np.array(img)
     new_img = Image.fromarray(shift_hue(arr, hue), 'RGBA')
     avatar = f'_avatar.png'
+    fnt = ImageFont.truetype(f'{path}/seguiemj.ttf', size=200, layout_engine=ImageFont.LAYOUT_RAQM)
+    draw = ImageDraw.Draw(new_img)
+    draw.text((140, 140), emoji, fill="#faa", embedded_color=True, font=fnt)
     new_img.save(avatar)
     api.update_profile_image(avatar)
     to_tinybird([{'batch': batch, 'date': str(datetime.now()), 'polarity': polarity, 'hue': hue}], 'polarity_log')
@@ -191,14 +203,16 @@ def run():
                     text += q.get('text')
         except Exception as e:
             print(e)
-        text = " ".join(re.sub("([^0-9A-Za-z \t])|(\w+:\/\/\S+)", "", text).split())
+        # text = " ".join(re.sub("([^0-9A-Za-z \t])|(\w+:\/\/\S+)", "", text).split())
         if text:
-            tweets.append({'batch': batch, 'id': tweet['id'], 'date': parsedate_to_datetime(str(tweet['created_at'])).strftime("%Y-%m-%d %H:%M:%S"), 'text': text, 'polarity': enrich_polarity(text)})
+            tweets.append({'search_term': batch, 'batch': batch, 'id': tweet['id'], 'date': parsedate_to_datetime(str(tweet['created_at'])).strftime("%Y-%m-%d %H:%M:%S"), 'text': text, 'polarity': enrich_polarity(text), 'tweet': text})
     to_tinybird(tweets, datasource)
+    to_tinybird(tweets, 'tweets_s__v0')
     polarity = get_polarity(tb_api)
     if polarity:
         hue = polarity2hue(polarity)
-        update_avatar(hue, polarity)
+        emoji = get_emoji(tb_api)
+        update_avatar(hue, polarity, emoji)
 
     data = get_polarity_mvng_avg(tb_api)
     create_stripes(data)
