@@ -1,0 +1,11 @@
+
+SCHEMA >
+    `batch` LowCardinality(String) `json:$.batch`,
+    `id` Int64 `json:$.id`,
+    `date` DateTime `json:$.date`,
+    `text` String `json:$.text`,
+    `polarity` Float32 `json:$.polarity`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(date)"
+ENGINE_SORTING_KEY "batch, date, cityHash64(text)"

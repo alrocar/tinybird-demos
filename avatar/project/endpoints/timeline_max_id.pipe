@@ -1,0 +1,7 @@
+NODE batch_tweets_pipe_4153_0
+SQL >
+    %
+    SELECT max(id) since_id FROM tweets
+    WHERE batch == {{String(batch, 'alrocar')}}
+
+

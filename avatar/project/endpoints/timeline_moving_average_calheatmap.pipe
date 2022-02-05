@@ -1,0 +1,78 @@
+NODE alrocar_timeline_moving_average_1
+SQL >
+
+    select * from (
+    SELECT toStartOfHour(date) d, avg(polarity) * 100 polarity FROM alrocar_tweets
+    where date between now() - interval 2 week and now()
+    group by d
+    UNION ALL
+    with (
+      select avg(polarity) * 100 FROM alrocar_tweets
+    where date between now() - interval 1 week and now()
+    ) as avg_polarity
+    SELECT addHours(toDateTime(toStartOfHour(now()) - interval 151 hour), number) AS date,0 polarity
+        FROM (
+            SELECT arrayJoin(range(14*24)) AS number
+        )
+      where date not in (SELECT toStartOfHour(date) d FROM alrocar_tweets
+    where date between now() - interval 2 week and now()
+    group by d)
+      ) order by d desc
+
+
+
+NODE alrocar_timeline_moving_average_2
+SQL >
+
+    SELECT groupArray(d) d_arr, groupArrayMovingAvg(3)(polarity) polarity_arr FROM alrocar_timeline_moving_average_1
+
+
+
+NODE alrocar_timeline_moving_average_3
+SQL >
+
+    SELECT d_arr[num] d, polarity_arr[num] polarity
+    FROM alrocar_timeline_moving_average_2
+    ARRAY JOIN arrayEnumerate(polarity_arr) AS num
+    order by d desc
+    limit 1000
+
+
+
+NODE alrocar_timeline_moving_average_4
+SQL >
+
+    select * FROM alrocar_timeline_moving_average_3
+    order by d asc
+
+
+
+NODE alrocar_timeline_moving_average_5
+SQL >
+
+    SELECT min(polarity) min, max(polarity) max FROM alrocar_timeline_moving_average_4
+
+
+
+NODE alrocar_timeline_moving_average_6
+SQL >
+
+    with (select min from alrocar_timeline_moving_average_5) as min,
+    (select max from alrocar_timeline_moving_average_5) as max
+    SELECT toUnixTimestamp(d) date, toInt32(if(polarity < 0, -abs(polarity * 100 / min), polarity * 100 / max) + 100) polarity FROM alrocar_timeline_moving_average_4
+
+
+
+NODE alrocar_timeline_moving_average_7
+SQL >
+
+    select count() from alrocar_timeline_moving_average_6
+
+
+
+NODE alrocar_timeline_moving_average_8
+SQL >
+
+    SELECT count() FROM alrocar_tweets_raw
+
+

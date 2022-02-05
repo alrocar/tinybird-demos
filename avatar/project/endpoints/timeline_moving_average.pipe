@@ -1,0 +1,72 @@
+NODE timeline_moving_average_1
+SQL >
+    %
+    select * from (
+    SELECT toStartOfHour(date) d, avg(polarity) * 100 polarity FROM tweets
+    where
+    batch == {{String(batch, 'alrocar')}} and
+    date between now() - interval 151 hour and now()
+    group by d
+    UNION ALL
+    with (
+      select avg(polarity) * 100 FROM tweets
+    where
+    batch == {{String(batch, 'alrocar')}} and
+    date between now() - interval 1 week and now()
+    ) as avg_polarity
+    SELECT addHours(toDateTime(toStartOfHour(now()) - interval 151 hour), number) AS date, avg_polarity polarity
+        FROM (
+            SELECT arrayJoin(range(151)) AS number
+        )
+      where
+      date not in (SELECT toStartOfHour(date) d FROM tweets
+    where
+    batch == {{String(batch, 'alrocar')}} and
+    date between now() - interval 151 hour and now()
+    group by d)
+      ) order by d desc
+
+
+
+NODE timeline_moving_average_2
+SQL >
+
+    SELECT groupArray(d) d_arr, groupArrayMovingAvg(3)(polarity) polarity_arr FROM timeline_moving_average_1
+
+
+
+NODE timeline_moving_average_3
+SQL >
+
+    SELECT d_arr[num] d, polarity_arr[num] polarity
+    FROM timeline_moving_average_2
+    ARRAY JOIN arrayEnumerate(polarity_arr) AS num
+    order by d desc
+    limit 150
+
+
+
+NODE timeline_moving_average_4
+SQL >
+
+    select * FROM timeline_moving_average_3
+    order by d asc
+
+
+
+NODE timeline_moving_average_5
+SQL >
+
+    SELECT min(polarity) min, max(polarity) max FROM timeline_moving_average_4
+
+
+
+NODE timeline_moving_average_6
+SQL >
+
+    with (select min from timeline_moving_average_5) as min,
+    (select max from timeline_moving_average_5) as max
+    SELECT d, if(polarity < 0, -abs(polarity * 100 / min), polarity * 100 / max) polarity FROM timeline_moving_average_4
+
+
+

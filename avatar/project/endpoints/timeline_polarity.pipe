@@ -1,0 +1,18 @@
+NODE tweets_pipe_4153_0
+SQL >
+    %
+    SELECT avgIf(polarity, polarity != 0) * 100 polarity FROM tweets
+    where
+    batch == {{String(batch, 'alrocar')}} and
+    date between now() - interval 24 hour and now()
+
+
+
+NODE timeline_polarity_1
+SQL >
+    %
+    with (select min(polarity) from tweets where batch == {{String(batch, 'alrocar')}} and date between now() - interval 1 week and now()) as min,
+    (select max(polarity) from tweets where batch == {{String(batch, 'alrocar')}} and date between now() - interval 1 week and now()) as max
+    SELECT if(polarity < 0, -abs(polarity / min), polarity / max) polarity FROM tweets_pipe_4153_0
+
+
