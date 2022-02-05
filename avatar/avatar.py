@@ -154,7 +154,7 @@ def create_stripes(data):
         new_img = Image.fromarray(data)
         Image.Image.paste(stripes, new_img, (10 * i, 0))
         i += 1
-    stripes.save('stripes.png')
+    stripes.save(f'{path}/stripes.png')
 
 
 def run():
