@@ -39,13 +39,13 @@ def get_last_tweet_id(tb_api):
     return data[0]['since_id']
 
 
-def get_emoji(tb_api):
-    url = f'pipes/emoji_count_endpoint.json?search_term={batch}'
+def get_emoji(tb_api, limit=1):
+    url = f'pipes/emoji_count_endpoint.json?search_term={batch}&result_limit={limit}'
     response = tb_api.get(url)
     data = response.json()['data']
     if len(data) == 0:
         return
-    return data[0]['emoji']
+    return data
 
 
 def get_polarity_mvng_avg(tb_api):
@@ -84,10 +84,16 @@ def enrich_polarity(tweet):
         if language != 'en':
             analysis = analysis.translate(to='en')
         return round(analysis.sentiment.polarity, 4)
-    except Exception:
-        pass
     except TranslatorError:
-        pass
+        try:
+            return round(analysis.sentiment.polarity, 4)
+        except:
+            return 0
+    except Exception:
+        try:
+            return round(analysis.sentiment.polarity, 4)
+        except:
+            return 0
 
 
 def to_tinybird(rows, datasource_name, token=TB_TOKEN):
@@ -121,9 +127,9 @@ def update_avatar(hue, polarity, emoji):
     arr = np.array(img)
     new_img = Image.fromarray(shift_hue(arr, hue), 'RGBA')
     avatar = f'_avatar.png'
-    fnt = ImageFont.truetype(f'{path}/seguiemj.ttf', size=200, layout_engine=ImageFont.LAYOUT_RAQM)
+    fnt = ImageFont.truetype(f'{path}/NotoColorEmoji.ttf', size=109, layout_engine=ImageFont.LAYOUT_RAQM)
     draw = ImageDraw.Draw(new_img)
-    draw.text((140, 140), emoji, fill="#faa", embedded_color=True, font=fnt)
+    draw.text((180, 180), emoji, fill="#faa", embedded_color=True, font=fnt)
     new_img.save(avatar)
     api.update_profile_image(avatar)
     to_tinybird([{'batch': batch, 'date': str(datetime.now()), 'polarity': polarity, 'hue': hue}], 'polarity_log')
@@ -134,12 +140,14 @@ def update_header():
     api.update_profile_banner(f'{path}/stripes.png')
 
 
-def create_stripes(data):
+def create_stripes(data, emojis):
     path = pathlib.Path(__file__).parent.absolute()
     stripes = Image.new(mode="RGB", size=(1500, 500))
     i = 0
     import math
-    for p in data:
+    fnt = ImageFont.truetype(f'{path}/NotoColorEmoji.ttf', size=109, layout_engine=ImageFont.LAYOUT_RAQM)
+    emojis.reverse()
+    for p, emoji in zip(data, emojis):
         img = Image.open(f'{path}/stripe.png').convert('RGBA')
         aa = img.load()
         # hues = [[103,0,13], [165,15,21], [203,24,29], [239,59,44], [251,106,74], [252,146,114], [252,187,161], [254,224,210], [255,245,240], [247,251,255], [222,235,247], [198,219,239], [158,202,225], [107,174,214], [66,146,198], [33,113,181], [8,81,156], [8,48,107]]       
@@ -164,56 +172,76 @@ def create_stripes(data):
         data[:,:,:3][mask] = [r2, g2, b2]
 
         new_img = Image.fromarray(data)
+        
         Image.Image.paste(stripes, new_img, (10 * i, 0))
+        icon = Image.new(mode="RGB", size=(140, 140))
+        draw = ImageDraw.Draw(icon)
+        draw.text((0, 0), emoji['emoji'], fill="#faa", embedded_color=True, font=fnt)
+        # draw.text((10*i, 0), emoji['emoji'], fill="#faa", embedded_color=True, font=fnt)
+        icon.save(f'{i}.png')
+        out = icon.resize((10, 10))
+        rgba = out.convert("RGBA")
+        datas = rgba.getdata()
+        
+        newData = []
+        for item in datas:
+            if item[0] == 0 and item[1] == 0 and item[2] == 0: 
+                newData.append((r2, g2, b2, 0))
+            else:
+                newData.append(item)
+        
+        rgba.putdata(newData)
+        Image.Image.paste(stripes, rgba, (10*i, int(p['polarity'] * 2.50 + 250)))
         i += 1
     stripes.save(f'{path}/stripes.png')
 
 
 def run():
     print('here we go again bitch...')
-    since_id = get_last_tweet_id(tb_api)
-    tweets_raw = get_tweets(since_id)
-    tweets = []
-    for tweet in tweets_raw:
-        tweet = tweet._json
-        text = ''
-        try:
-            if tweet['truncated']:
-                text = tweet['extended_tweet']['full_text']
-            else:
-                text = tweet['text']
-        except Exception as e:
-            print(e)
+    # since_id = get_last_tweet_id(tb_api)
+    # tweets_raw = get_tweets(since_id)
+    # tweets = []
+    # for tweet in tweets_raw:
+    #     tweet = tweet._json
+    #     text = ''
+    #     try:
+    #         if tweet['truncated']:
+    #             text = tweet['extended_tweet']['full_text']
+    #         else:
+    #             text = tweet['text']
+    #     except Exception as e:
+    #         print(e)
         
-        try:
-            if tweet.get('retweeted_status'):
-                if tweet.get('retweeted_status')['truncated']:
-                    text += tweet['retweeted_status'].get('extended_tweet', {})['full_text']
-                else:
-                    text += tweet['retweeted_status'].get('text')
-        except Exception as e:
-            print(e)
+    #     try:
+    #         if tweet.get('retweeted_status'):
+    #             if tweet.get('retweeted_status')['truncated']:
+    #                 text += tweet['retweeted_status'].get('extended_tweet', {})['full_text']
+    #             else:
+    #                 text += tweet['retweeted_status'].get('text')
+    #     except Exception as e:
+    #         print(e)
         
-        try:
-            if tweet.get('quoted_status'):
-                q = tweet.get('quoted_status')
-                if q['truncated']:
-                    text += q.get('extended_tweet', {})['full_text']
-                else:
-                    text += q.get('text')
-        except Exception as e:
-            print(e)
-        # text = " ".join(re.sub("([^0-9A-Za-z \t])|(\w+:\/\/\S+)", "", text).split())
-        if text:
-            tweets.append({'search_term': batch, 'batch': batch, 'id': tweet['id'], 'date': parsedate_to_datetime(str(tweet['created_at'])).strftime("%Y-%m-%d %H:%M:%S"), 'text': text, 'polarity': enrich_polarity(text), 'tweet': text})
-    to_tinybird(tweets, datasource)
-    to_tinybird(tweets, 'tweets_s__v0')
-    polarity = get_polarity(tb_api)
-    if polarity:
-        hue = polarity2hue(polarity)
-        emoji = get_emoji(tb_api)
-        update_avatar(hue, polarity, emoji)
+    #     try:
+    #         if tweet.get('quoted_status'):
+    #             q = tweet.get('quoted_status')
+    #             if q['truncated']:
+    #                 text += q.get('extended_tweet', {})['full_text']
+    #             else:
+    #                 text += q.get('text')
+    #     except Exception as e:
+    #         print(e)
+    #     # text = " ".join(re.sub("([^0-9A-Za-z \t])|(\w+:\/\/\S+)", "", text).split())
+    #     if text:
+    #         tweets.append({'search_term': batch, 'batch': batch, 'id': tweet['id'], 'date': parsedate_to_datetime(str(tweet['created_at'])).strftime("%Y-%m-%d %H:%M:%S"), 'text': text, 'polarity': enrich_polarity(text), 'tweet': text})
+    # to_tinybird(tweets, datasource)
+    # to_tinybird(tweets, 'tweets_s__v0')
+    # polarity = get_polarity(tb_api)
+    # if polarity:
+    #     hue = polarity2hue(polarity)
+    #     emoji = get_emoji(tb_api)[0]['emoji']
+    #     update_avatar(hue, polarity, emoji)
 
     data = get_polarity_mvng_avg(tb_api)
-    create_stripes(data)
+    emojis = get_emoji(tb_api, limit=150)
+    create_stripes(data, emojis)
     update_header()
