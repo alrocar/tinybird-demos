@@ -2,6 +2,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from avatar import run
 
 scheduler = BlockingScheduler()
-scheduler.add_job(run, "interval", seconds=300)
+run()
+scheduler.add_job(run, "interval", seconds=900)
 
 scheduler.start()
