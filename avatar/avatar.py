@@ -200,22 +200,22 @@ def create_stripes(data, emojis):
         new_img = Image.fromarray(data)
         
         Image.Image.paste(stripes, new_img, (10 * i, 0))
-        icon = Image.new(mode="RGB", size=(140, 140))
-        draw = ImageDraw.Draw(icon)
-        draw.text((0, 0), emoji['emoji'], fill="#faa", embedded_color=True, font=fnt)
-        out = icon.resize((10, 10))
-        rgba = out.convert("RGBA")
-        datas = rgba.getdata()
+        # icon = Image.new(mode="RGB", size=(140, 140))
+        # draw = ImageDraw.Draw(icon)
+        # draw.text((0, 0), emoji['emoji'], fill="#faa", embedded_color=True, font=fnt)
+        # out = icon.resize((10, 10))
+        # rgba = out.convert("RGBA")
+        # datas = rgba.getdata()
         
-        newData = []
-        for item in datas:
-            if item[0] == 0 and item[1] == 0 and item[2] == 0: 
-                newData.append((r2, g2, b2, 0))
-            else:
-                newData.append(item)
+        # newData = []
+        # for item in datas:
+        #     if item[0] == 0 and item[1] == 0 and item[2] == 0: 
+        #         newData.append((r2, g2, b2, 0))
+        #     else:
+        #         newData.append(item)
         
-        rgba.putdata(newData)
-        Image.Image.paste(stripes, rgba, (10*i, int(p['polarity'] * -2.50 + 250)))
+        # rgba.putdata(newData)
+        # Image.Image.paste(stripes, rgba, (10*i, int(p['polarity'] * -2.50 + 250)))
         i += 1
     stripes.save(f'{path}/stripes.png')
 
