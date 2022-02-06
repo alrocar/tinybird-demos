@@ -113,7 +113,7 @@ def get_polarity(tb_api):
 
 
 def polarity2hue(polarity):
-    rr = 18
+    rr = 3
     min = 0
     max = 180 - 78
     range = max - min
