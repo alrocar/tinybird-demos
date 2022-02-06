@@ -189,7 +189,7 @@ def create_stripes(data, emojis):
                 newData.append(item)
         
         rgba.putdata(newData)
-        Image.Image.paste(stripes, rgba, (10*i, int(p['polarity'] * 2.50 + 250)))
+        Image.Image.paste(stripes, rgba, (10*i, int(p['polarity'] * -2.50 + 250)))
         i += 1
     stripes.save(f'{path}/stripes.png')
 
