@@ -130,7 +130,8 @@ def update_avatar(hue, polarity, emoji):
     avatar = f'_avatar.png'
     fnt = ImageFont.truetype(f'{path}/NotoColorEmoji.ttf', size=109, layout_engine=ImageFont.LAYOUT_RAQM)
     draw = ImageDraw.Draw(new_img)
-    draw.text((250, 840), emoji, fill="#faa", embedded_color=True, font=fnt)
+    draw.text((430, 400), emoji, fill="#faa", embedded_color=True, font=fnt)
+    draw.text((580, 420), emoji, fill="#faa", embedded_color=True, font=fnt)
     new_img.save(avatar)
 
     shape = [(10, 10), (140, 140)]
