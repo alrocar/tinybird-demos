@@ -113,11 +113,12 @@ def get_polarity(tb_api):
 
 
 def polarity2hue(polarity):
+    rr = 18
     min = 0
     max = 180 - 78
     range = max - min
-    step = range / 18
-    step_polarity = 200 / 18
+    step = range / rr
+    step_polarity = 200 / rr
     return (polarity + 100) / step_polarity * step / 360 #* 1.8/720
 
 
@@ -131,7 +132,31 @@ def update_avatar(hue, polarity, emoji):
     draw = ImageDraw.Draw(new_img)
     draw.text((180, 180), emoji, fill="#faa", embedded_color=True, font=fnt)
     new_img.save(avatar)
-    api.update_profile_image(avatar)
+
+    shape = [(10, 10), (140, 140)]
+    
+    # creating new Image object
+    arc = Image.new("RGBA", (130, 130))
+
+    # create rectangle image
+    img1 = ImageDraw.Draw(arc)  
+    img1.arc(shape, end = 360 - 60, start = 360 - 120, fill ="black", width=14)
+
+    if polarity:
+        rr = True if polarity > 0 else False
+        rtat = -50 if rr else 0
+        arc = arc.rotate(180 if rr else 0)
+        arc = arc.resize((200, 70), Image.ANTIALIAS)
+        
+
+        new_img = new_img.convert('RGBA')
+        new_img.paste(arc, (475, 638 + rtat), arc)
+
+    # Image.Image.paste(new_img, rgba, (475, 638))
+    new_img.save(avatar)
+    
+
+    # api.update_profile_image(avatar)
     to_tinybird([{'batch': batch, 'date': str(datetime.now()), 'polarity': polarity, 'hue': hue}], 'polarity_log')
 
 

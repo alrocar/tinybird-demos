@@ -2,7 +2,7 @@ requests==2.27.1
 tweepy==3.10.0
 textblob==0.15.3
 numpy==1.19.5
-pillow==8.1.0
+pillow==9.0.1
 nltk
 git+https://github.com/tinybirdco/tinybird-python-sdk@master
 APScheduler==3.8.1
