@@ -156,7 +156,7 @@ def update_avatar(hue, polarity, emoji):
     new_img.save(avatar)
     
 
-    # api.update_profile_image(avatar)
+    api.update_profile_image(avatar)
     to_tinybird([{'batch': batch, 'date': str(datetime.now()), 'polarity': polarity, 'hue': hue}], 'polarity_log')
 
 
