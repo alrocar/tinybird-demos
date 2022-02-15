@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Four color theorem | CARTO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <script src="https://libs.cartocdn.com/carto-vl/v1.3.0/carto-vl.min.js"></script>
+  <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.js"></script>
+  <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+      center: [0, 0],
+      zoom: 1,
+      dragRotate: false
+    });
+
+    carto.setDefaultAuth({
+      user: 'aromeu',
+      apiKey: 'default_public'
+    });
+
+    let duration = 60
+    const linesSource = new carto.source.SQL(`
+      SELECT *
+      FROM world_borders_four_colors_anim_kempe_adjacency_list_final_lines
+    `);
+    const linesViz = new carto.Viz(`
+      width: ramp(linear($color,1,5),[1.5,1.5])
+      color: ramp(buckets($color, [1, 2, 3, 4, 5]), Bold)
+      filter: animation(linear($ord, 0 , 1000), ${duration}, fade(0.1,0.5))+0.05
+    `);
+    const linesLayer = new carto.Layer('linesLayer', linesSource, linesViz);
+
+    const polySource = new carto.source.Dataset(`
+      world_borders_four_colors_anim_kempe_adjacency_list_final
+    `);
+    const polyViz = new carto.Viz(`
+      color: ramp(buckets($color, [1, 2, 3, 4, 5]), Bold)
+      strokeWidth: 0
+      filter: animation(linear($ord, 0, 1000), ${duration}, fade(0,120))
+    `);
+    const polyLayer = new carto.Layer('polyLayer', polySource, polyViz);
+
+    linesLayer.addTo(map, 'watername_ocean');
+    polyLayer.addTo(map, 'linesLayer');
+  </script>
+</body>
+</html>
+

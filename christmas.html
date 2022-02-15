@@ -143,7 +143,7 @@ var n = get('limit'), // total number of nodes
 var totalCount = 0
 
 
-url = 'https://api.wadus.tinybird.co/v0/pipes/emoji_count_endpoint.json?token=p.eyJ1IjogImMzNzE2ZTEwLTRjODktNGU4Yi1hMDYzLWUyYTJmNTNlZWQzZCIsICJpZCI6ICJjMmFiMTJkOC1mN2IzLTQ2YjEtYTBkMC1iYjA3OWRjMmNjM2YifQ.nutgsp5IGvLCjV38WW0O7MCgfH3X_hZeXTuszGnmG_o&search_term=covid,Merry%20Christmas&limit=' + n
+url = 'https://api.wadus.tinybird.co/v0/pipes/emoji_text_count_endpoint.json?token=p.eyJ1IjogImMzNzE2ZTEwLTRjODktNGU4Yi1hMDYzLWUyYTJmNTNlZWQzZCIsICJpZCI6ICJlYmM1ZjI3ZC0zOTQ4LTRmOGEtYmQ2ZS1lZWQxYjJmMjE5MzYifQ.VUeDkwiNAGODAL7Zg8TtvSiCwu1M7d7ocC2FOJiUoj8&limit=' + n
 
 function pra() {
     var clusters = new Array(m);
@@ -188,7 +188,8 @@ function pra() {
 
         var node = svg.selectAll()
             .data(nodes)
-            .enter().append("text")
+            .enter()
+            .append("text")
             .attr('id', function(d) { return "_" + d.id; })
             .attr('text-anchor', 'middle')
             .style("font-size", function(d) { return d.radius; })
@@ -345,7 +346,7 @@ const updateDebounceValue = () => {
     console.log('debounce')
     output.innerHTML = slider.value;
     n = slider.value;
-    url = 'https://api.wadus.tinybird.co/v0/pipes/emoji_count_endpoint.json?token=p.eyJ1IjogImMzNzE2ZTEwLTRjODktNGU4Yi1hMDYzLWUyYTJmNTNlZWQzZCIsICJpZCI6ICJjMmFiMTJkOC1mN2IzLTQ2YjEtYTBkMC1iYjA3OWRjMmNjM2YifQ.nutgsp5IGvLCjV38WW0O7MCgfH3X_hZeXTuszGnmG_o&search_term=covid,Merry%20Christmas&limit=' + n
+    url = 'https://api.wadus.tinybird.co/v0/pipes/emoji_text_count_endpoint.json?token=p.eyJ1IjogImMzNzE2ZTEwLTRjODktNGU4Yi1hMDYzLWUyYTJmNTNlZWQzZCIsICJpZCI6ICJlYmM1ZjI3ZC0zOTQ4LTRmOGEtYmQ2ZS1lZWQxYjJmMjE5MzYifQ.VUeDkwiNAGODAL7Zg8TtvSiCwu1M7d7ocC2FOJiUoj8&limit=' + n
     d3.selectAll("svg").remove();
     window.clearInterval(window.ss)
     window.clearInterval(window.aa)
