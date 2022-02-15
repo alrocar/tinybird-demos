@@ -383,7 +383,7 @@ var count = function() {
     }
     const ss = setInterval(function () {
         let a = parseInt(document.getElementById("tt").innerHTML.split(':')[1].trim(), 10)
-        a += Math.floor(Math.random() * 7);
+        a += Math.floor(Math.random() * 2);
         document.getElementById("tt").innerHTML = "Total emojis processed: " + a;
     }, 100)
     window.ss = ss
