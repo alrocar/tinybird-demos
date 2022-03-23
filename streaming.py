@@ -20,7 +20,7 @@ ACCESS_TOKEN_SECRET = os.environ['ACCESS_TOKEN_SECRET']
 TB_TOKEN = os.environ['TB_TOKEN']
 READ_TOKEN = os.environ['READ_TOKEN']
 
-TB_API_URL = 'https://api.wadus.tinybird.co/v0'
+TB_API_URL = 'https://api.tinybird.co/v0'
 datasource = 'tweets'
 
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)

@@ -143,7 +143,7 @@ var n = get('limit'), // total number of nodes
 var totalCount = 0
 
 
-url = 'https://api.wadus.tinybird.co/v0/pipes/emoji_text_count_endpoint.json?token=p.eyJ1IjogImMzNzE2ZTEwLTRjODktNGU4Yi1hMDYzLWUyYTJmNTNlZWQzZCIsICJpZCI6ICJlYmM1ZjI3ZC0zOTQ4LTRmOGEtYmQ2ZS1lZWQxYjJmMjE5MzYifQ.VUeDkwiNAGODAL7Zg8TtvSiCwu1M7d7ocC2FOJiUoj8&limit=' + n
+url = 'https://api.tinybird.co/v0/pipes/emoji_text_count_endpoint.json?token=p.eyJ1IjogImJlNjFiOGQ1LWQ3ZjUtNGE4YS05YzQ0LTMzNTlkZjkyOTVlNiIsICJpZCI6ICIwYmIzODFiMy1lMTRmLTRmMjctOGE5ZC0wMTk0M2MyNjkwNjUifQ.lDBSXk5fpUQN_Lp2Wqr3WftKuRrBlcf9JpQytmvgniE&limit=' + n
 
 function pra() {
     var clusters = new Array(m);
@@ -346,7 +346,7 @@ const updateDebounceValue = () => {
     console.log('debounce')
     output.innerHTML = slider.value;
     n = slider.value;
-    url = 'https://api.wadus.tinybird.co/v0/pipes/emoji_text_count_endpoint.json?token=p.eyJ1IjogImMzNzE2ZTEwLTRjODktNGU4Yi1hMDYzLWUyYTJmNTNlZWQzZCIsICJpZCI6ICJlYmM1ZjI3ZC0zOTQ4LTRmOGEtYmQ2ZS1lZWQxYjJmMjE5MzYifQ.VUeDkwiNAGODAL7Zg8TtvSiCwu1M7d7ocC2FOJiUoj8&limit=' + n
+    url = 'https://api.tinybird.co/v0/pipes/emoji_text_count_endpoint.json?token=p.eyJ1IjogImJlNjFiOGQ1LWQ3ZjUtNGE4YS05YzQ0LTMzNTlkZjkyOTVlNiIsICJpZCI6ICIwYmIzODFiMy1lMTRmLTRmMjctOGE5ZC0wMTk0M2MyNjkwNjUifQ.lDBSXk5fpUQN_Lp2Wqr3WftKuRrBlcf9JpQytmvgniE&limit=' + n
     d3.selectAll("svg").remove();
     window.clearInterval(window.ss)
     window.clearInterval(window.aa)
