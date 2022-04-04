@@ -21,16 +21,35 @@ ACCESS_TOKEN_SECRET = os.environ['AVATAR_ACCESS_TOKEN_SECRET']
 TB_TOKEN = os.environ['AVATAR_TBB_TOKEN']
 READ_TOKEN = os.environ['AVATAR_READ_TOKEN']
 
+TBCONSUMER_KEY = os.environ['TBAVATAR_CONSUMER_KEY']
+TBCONSUMER_SECRET = os.environ['TBAVATAR_CONSUMER_SECRET']
+TBACCESS_TOKEN = os.environ['TBAVATAR_ACCESS_TOKEN']
+TBACCESS_TOKEN_SECRET = os.environ['TBAVATAR_ACCESS_TOKEN_SECRET']
+
 datasource = f'tweets'
 
-auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-api = tweepy.API(auth, timeout=300)
-tb_api = API(TB_TOKEN)
-batch = 'alrocar'
+config = {
+    'alrocar': {
+        'consumer_key': CONSUMER_KEY,
+        'consumer_secret': CONSUMER_SECRET,
+        'access_token': ACCESS_TOKEN,
+        'access_token_secret': ACCESS_TOKEN_SECRET,
+        'tb_token': TB_TOKEN,
+        'tb_read_token': READ_TOKEN
+    },
+    'tinybirdco': {
+        'consumer_key': TBCONSUMER_KEY,
+        'consumer_secret': TBCONSUMER_SECRET,
+        'access_token': TBACCESS_TOKEN,
+        'access_token_secret': TBACCESS_TOKEN_SECRET,
+        'tb_token': TB_TOKEN,
+        'tb_read_token': READ_TOKEN,
+        'id': 1501914178298261500
+    }
+}
 
 
-def get_last_tweet_id(tb_api):
+def get_last_tweet_id(tb_api, batch):
     max_id_url = f'pipes/timeline_max_id.json?batch={batch}'
     response = tb_api.get(max_id_url)
     data = response.json()['data']
@@ -39,7 +58,7 @@ def get_last_tweet_id(tb_api):
     return data[0]['since_id']
 
 
-def get_emoji(tb_api, limit=1):
+def get_emoji(tb_api, batch, limit=1):
     url = f'pipes/emoji_count_endpoint.json?search_term={batch}&result_limit={limit}'
     response = tb_api.get(url)
     data = response.json()['data']
@@ -48,7 +67,7 @@ def get_emoji(tb_api, limit=1):
     return data
 
 
-def get_polarity_mvng_avg(tb_api):
+def get_polarity_mvng_avg(tb_api, batch):
     max_id_url = f'pipes/timeline_moving_average.json?batch={batch}'
     response = tb_api.get(max_id_url)
     data = response.json()['data']
@@ -57,12 +76,36 @@ def get_polarity_mvng_avg(tb_api):
     return data
 
 
-def get_tweets(since_id=None, user=None):
+
+def get_tweets(api, since_id=None, user=None):
     raw = []
-    # for page in tweepy.Cursor(api.user_timeline, id=batch, count=200, exclude_replies=False).pages(15):
-    for page in tweepy.Cursor(api.home_timeline, since_id=since_id, count=200, exclude_replies=False).pages(1):
-        for tweet in page:
-            raw.append(tweet)
+    # if user:
+    #     for page in tweepy.Cursor(api.user_timeline, user_id=user, count=200, exclude_replies=False, inclure_rts=True).pages(1):
+    #         for tweet in page:
+    #                 raw.append(tweet)
+    #     for page in tweepy.Cursor(api.mentions_timeline, count=200).pages(1):
+    #         for tweet in page:
+    #                 raw.append(tweet)
+    # else:
+    # if user == 'alrocar':
+    if since_id:
+        for page in tweepy.Cursor(api.home_timeline, since_id=since_id, count=200, exclude_replies=False).pages(1):
+            for tweet in page:
+                raw.append(tweet)
+    else:
+        for page in tweepy.Cursor(api.home_timeline, count=200, exclude_replies=False).pages(5):
+            for tweet in page:
+                raw.append(tweet)
+    # else:
+    #     uu = api.get_user(username=user, user_auth=True)
+    #     result = api.get_users_mentions(id=uu.data.id, max_results=100, since_id=since_id, user_auth=True, tweet_fields=['text', 'created_at', 'id'])
+    #     for res in result.data:
+    #         raw.append({'truncated': False, 'text': res.text, 'created_at': res.created_at, 'id': res.id})
+
+    #     result = api.get_users_tweets(id=uu.data.id, max_results=100, since_id=since_id, user_auth=True, tweet_fields=['text', 'created_at', 'id'])
+    #     for res in result.data:
+    #         raw.append({'truncated': False, 'text': res.text, 'created_at': res.created_at, 'id': res.id})
+    
     return raw
 
 
@@ -103,7 +146,7 @@ def to_tinybird(rows, datasource_name, token=TB_TOKEN):
                 ds << row
 
 
-def get_polarity(tb_api):
+def get_polarity(tb_api, batch):
     polarity_url = f'pipes/timeline_polarity.json?batch={batch}'
     response = tb_api.get(polarity_url)
     data = response.json()['data']
@@ -122,7 +165,7 @@ def polarity2hue(polarity):
     return (polarity + 100) / step_polarity * step / 360 #* 1.8/720
 
 
-def update_avatar(hue, polarity, emoji):
+def update_avatar(hue, polarity, api, emoji):
     path = pathlib.Path(__file__).parent.absolute()
     img = Image.open(f'{path}/avatar.png').convert('RGBA')
     arr = np.array(img)
@@ -158,10 +201,9 @@ def update_avatar(hue, polarity, emoji):
     
 
     api.update_profile_image(avatar)
-    to_tinybird([{'batch': batch, 'date': str(datetime.now()), 'polarity': polarity, 'hue': hue}], 'polarity_log')
 
 
-def update_header():
+def update_header(api):
     path = pathlib.Path(__file__).parent.absolute()
     api.update_profile_banner(f'{path}/stripes.png')
 
@@ -221,51 +263,88 @@ def create_stripes(data, emojis):
 
 
 def run():
-    print('here we go again bitch...')
-    since_id = get_last_tweet_id(tb_api)
-    tweets_raw = get_tweets(since_id)
-    tweets = []
-    for tweet in tweets_raw:
-        tweet = tweet._json
-        text = ''
-        try:
-            if tweet['truncated']:
-                text = tweet['extended_tweet']['full_text']
-            else:
-                text = tweet['text']
-        except Exception as e:
-            print(e)
-        
-        try:
-            if tweet.get('retweeted_status'):
-                if tweet.get('retweeted_status')['truncated']:
-                    text += tweet['retweeted_status'].get('extended_tweet', {})['full_text']
-                else:
-                    text += tweet['retweeted_status'].get('text')
-        except Exception as e:
-            print(e)
-        
-        try:
-            if tweet.get('quoted_status'):
-                q = tweet.get('quoted_status')
-                if q['truncated']:
-                    text += q.get('extended_tweet', {})['full_text']
-                else:
-                    text += q.get('text')
-        except Exception as e:
-            print(e)
-        # text = " ".join(re.sub("([^0-9A-Za-z \t])|(\w+:\/\/\S+)", "", text).split())
-        if text:
-            tweets.append({'search_term': batch, 'batch': batch, 'id': tweet['id'], 'date': parsedate_to_datetime(str(tweet['created_at'])).strftime("%Y-%m-%d %H:%M:%S"), 'text': text, 'polarity': enrich_polarity(text), 'tweet': text})
-    to_tinybird(tweets, datasource)
-    to_tinybird(tweets, 'tweets_s__v0')
-    polarity = get_polarity(tb_api)
-    if polarity:
-        hue = polarity2hue(polarity)
-        emoji = get_emoji(tb_api)[0]['emoji']
-        update_avatar(hue, polarity, emoji)
+    for batch in config:
+        # if batch == 'alrocar':
+        #     continue
+        print(batch)
+        cc = config[batch]
+        # if batch == 'alrocar':
+        auth = tweepy.OAuthHandler(cc['consumer_key'], cc['consumer_secret'])
+        auth.set_access_token(cc['access_token'], cc['access_token_secret'])
+        api = tweepy.API(auth, timeout=300)
+        # else:
+        #     api = tweepy.Client(
+        #         consumer_key=cc['consumer_key'],
+        #         consumer_secret=cc['consumer_secret'],
+        #         access_token=cc['access_token'],
+        #         access_token_secret=cc['access_token_secret'],)
 
-    data = get_polarity_mvng_avg(tb_api)
-    emojis = get_emoji(tb_api, limit=150)
-    create_stripes(data, emojis)
-    update_header()
+        tb_api = API(cc['tb_token'])
+        
+        since_id = get_last_tweet_id(tb_api, batch)
+        tweets_raw = get_tweets(api, since_id, batch)
+        tweets = []
+        tt = []
+        for tweet in tweets_raw:
+            tweet = getattr(tweet, '_json', tweet)
+            text = ''
+            try:
+                if tweet['truncated']:
+                    text = tweet['extended_tweet']['full_text']
+                else:
+                    text = tweet['text']
+            except Exception as e:
+                print(e)
+            
+            try:
+                if tweet.get('retweeted_status'):
+                    if tweet.get('retweeted_status')['truncated']:
+                        text += tweet['retweeted_status'].get('extended_tweet', {})['full_text']
+                    else:
+                        text += tweet['retweeted_status'].get('text')
+            except Exception as e:
+                print(e)
+            
+            try:
+                if tweet.get('quoted_status'):
+                    q = tweet.get('quoted_status')
+                    if q['truncated']:
+                        text += q.get('extended_tweet', {})['full_text']
+                    else:
+                        text += q.get('text')
+            except Exception as e:
+                print(e)
+            # text = " ".join(re.sub("([^0-9A-Za-z \t])|(\w+:\/\/\S+)", "", text).split())
+            if text:
+                t = {
+                        'search_term': batch,
+                        'batch': batch,
+                        'id': tweet['id'],
+                        'date': parsedate_to_datetime(str(tweet['created_at'])).strftime("%Y-%m-%d %H:%M:%S") if not isinstance(tweet['created_at'], datetime) else str(tweet['created_at']),
+                        'text': text,
+                        'polarity': enrich_polarity(text),
+                        'tweet': text
+                    }
+                tweets.append(t)
+                tt.append(
+                    {
+                        'batch': t['batch'],
+                        'id': tweet['id'],
+                        'date': t['date'],
+                        'text': text,
+                        'polarity': t['polarity']
+                    })
+        to_tinybird(tt, datasource, token=cc['tb_token'])
+        to_tinybird(tweets, 'tweets_s__v0', token=cc['tb_token'])
+        polarity = get_polarity(tb_api, batch)
+        if polarity:
+            hue = polarity2hue(polarity)
+            emoji = get_emoji(tb_api, batch)[0]['emoji']
+            if batch == 'alrocar':
+                update_avatar(hue, polarity, api, emoji)
+            to_tinybird([{'batch': batch, 'date': str(datetime.now()), 'polarity': polarity, 'hue': hue}], 'polarity_log')
+
+        data = get_polarity_mvng_avg(tb_api, batch)
+        emojis = get_emoji(tb_api, batch, limit=150)
+        create_stripes(data, emojis)
+        update_header(api)
